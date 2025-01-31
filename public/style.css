@@ -1,0 +1,30 @@
+* { 
+    margin: 0px;
+    padding: 0px;
+    height:100%;
+}
+
+head{
+    height: 0px;
+}
+
+body{
+    background-color: #1a1a1a;
+    display: flex;
+}
+
+textarea{
+    width: 90vw;
+    height: 90vh;
+    margin: auto;
+    padding:10px;
+    resize: none;
+    outline: none;
+
+    background-color: #1a1a1a;
+    border-color: #000000;
+    border-width: 3px;
+    border-radius: 7.5px;
+    color:#7ce964;
+    font-size: 15px;
+}
