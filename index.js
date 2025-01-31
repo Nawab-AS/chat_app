@@ -3,8 +3,8 @@ var app = require("express")();
 var http = require("http").createServer(app);
 let io = require("socket.io")(http);
 let fs = require("fs");
-const PASSWORD = "test1";
-let file = ""
+const PASSWORD = process.env.PASSWORD;
+let file = "";
 
 app.use(express.static(__dirname + "/public"));
 app.use(function (req, res) {
