@@ -19,6 +19,7 @@ app.use(function (req, res) {
 
 io.on("connection", (socket) => {
     console.log("User connected");
+    console.log(PASSWORD);
     let auth = false;
 
     socket.on("auth", (data) => {
