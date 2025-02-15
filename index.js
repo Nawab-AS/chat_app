@@ -1,9 +1,9 @@
 let express = require("express");
-var app = require("express")();
+var app = express();
 var http = require("http").createServer(app);
 let io = require("socket.io")(http);
 let fs = require("fs");
-const PASSWORD = process.env.PASSWORD;
+const PASSWORD = "testing123";
 let file = "";
 
 app.use(express.static(__dirname + "/public"));
@@ -18,7 +18,6 @@ app.use(function (req, res) {
 
 io.on("connection", (socket) => {
     console.log("User connected");
-    console.log(PASSWORD);
     let auth = false;
 
     socket.on("auth", (data) => {
@@ -38,6 +37,6 @@ io.on("connection", (socket) => {
     });
 });
 
-http.listen(80, function () {
-    console.log("http listening on *:80");
+http.listen(process.env.PORT || 8080, function () {
+    console.log("http listening on *:" + (process.env.PORT || 8080));
 });
