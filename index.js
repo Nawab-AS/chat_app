@@ -3,8 +3,12 @@ var app = express();
 var http = require("http").createServer(app);
 let io = require("socket.io")(http);
 let fs = require("fs");
-const PASSWORD = "testing123";
+const PASSWORD = process.env.PASSWORD;
 let file = "";
+
+if (PASSWORD == undefined) {
+    console.log("ERROR: No password set");
+}
 
 app.use(express.static(__dirname + "/public"));
 app.use(function (req, res) {
