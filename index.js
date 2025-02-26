@@ -14,30 +14,15 @@ if (PASSWORD == undefined) {
 app.use(express.static(__dirname + "/public"));
 
 app.get("/", (req, res) => { // home page
-    res.sendFile(__dirname + "/public/home/index.html");
+    res.sendFile(__dirname + "/public/login/index.html");
 });
 
-function circularReplacer() {
-  const seen = new WeakSet(); // object
-  return (key, value) => {
-    if (typeof value === "object" && value !== null) {
-      if (seen.has(value)) {
-        return;
-      }
-      seen.add(value);
-    }
-    return value;
-  };
-}
-
 app.use(function (req, res) { // other files
-    
-    res.json(JSON.parse(JSON.stringify(obj, circularReplacer())));
-    /*if (fs.existsSync(__dirname + "/public" + req.url)){
+    if (fs.existsSync(__dirname + "/public" + req.url)){
         res.sendFile(__dirname + "/public" + req.url); // send file if path exists
     } else {
-        res.sendFile(__dirname + "/public/404.html"); // send 404 if path doesn't exist
-    }*/
+        res.sendFile(__dirname + "/public/404.html");
+    }
 });
 
 
