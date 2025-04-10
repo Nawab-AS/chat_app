@@ -1,0 +1,111 @@
+html {
+	height: 100%;
+	width: 100%;
+	font-family: "Comfortaa", sans-serif;
+	font-weight: 400;
+}
+
+#UI {
+	display: flex;
+	flex-direction: row;
+	height: calc(100vh - 20px);
+}
+
+#userlist {
+	border: 3px solid black;
+	border-radius: 10px 0px 0px 10px;
+	padding: 0px;
+	margin: 20px 0px 20px 20px;
+	color: #383838;
+	list-style-type: none;
+	display: flex;
+	flex-direction: column;
+	width: 150px;
+	overflow-y: scroll;
+	scrollbar-width: auto;
+	scrollbar-color: #375f8e #375f8e;
+}
+
+#userlist li {
+	display: flex;
+	align-items: center;
+	font-size: 17px;
+	overflow-x: scroll;
+	cursor: default;
+	height: 55px;
+	flex-shrink: 0;
+	transition-duration: 0.3s;
+}
+
+#userlist icon {
+	background-color: #375f8e;
+	color: #e5e4e0;
+	width: 25px;
+	flex-shrink: 0;
+	height: 25px;
+	border-radius: 50%;
+	text-align: center;
+	align-content: center;
+	display: inline-block;
+	font-weight: bolder;
+	font-size: 20px;
+	margin-right: 7px;
+	margin-left: 10px;
+}
+
+#userlist li:nth-child(even) {
+	background-color: #eeeeee;
+}
+
+#userlist li:hover {
+	background-color: #d2d0cb;
+	border-radius: 7px;
+}
+
+#chatArea {
+	display: flex;
+	flex-direction: column;
+	margin: 20px 20px 20px 0px;
+	border: 3px solid black;
+	border-radius: 0px 10px 10px 0px;
+	padding: 0px;
+	color: #383838;
+	width: calc(100% - 150px);
+}
+
+
+#chatArea titleBar {
+	height: 30px;
+	flex-shrink: 0;
+	text-align: center;
+	align-content: center;
+	padding: 5px;
+	color: #e5e4e0;
+	font-weight: 900;
+	background-color: #289013;
+	border-radius: 0px 7px 0px 0px;
+}
+
+#messages {
+	flex-grow: 0;
+	overflow-y: auto;
+	padding: 10px;
+	display: flex;
+	flex-direction: column-reverse;
+}
+
+#messages p {
+	position: relative;
+	margin: 0 0 10px 0;
+	padding: 5px;
+	border: 2px solid #375f8e;
+	border-radius: 5px;
+	max-width: 80%;
+	word-wrap: normal;
+	right: -17%;
+}
+
+#messages p.ByMe {
+	right: 0px;
+	text-align: right;
+}
