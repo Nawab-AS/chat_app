@@ -3,11 +3,10 @@
 // This is the routing module
 //     for the server.
 
-const express = require("express");
 var fs = require("fs");
 const Session = require("express-session");
 const bodyParser = require("body-parser");
-const Router = express.Router();
+const Router = require("express").Router();
 const SESSION_SECRET = process.env.SESSION_SECRET || "testing123";
 const dev = process.env.ENVIRONMENT == "DEV";
 
@@ -26,7 +25,7 @@ function debug(message) {
 let users = [
   { id: 1, username: "james1234", password: "password1234" },
   { id: 2, username: "billy101", password: "mypassword" },
-  { id: 3, username: "james469", password: "secret" },
+  { id: 3, username: "max469", password: "secret" },
 ];
 function authenticateLogin(username, password) {
   if (username && password) {
@@ -38,7 +37,6 @@ function authenticateLogin(username, password) {
   return false;
 }
 
-// redirect to login page middleware
 const redirectToLogin = (req, res, next) => {
   if (!req.session.userId) {
     res.redirect("/login");
@@ -46,6 +44,14 @@ const redirectToLogin = (req, res, next) => {
     next();
   }
 };
+
+const redirectToHome = (req, res, next) => {
+  if (req.session.userId) {
+    res.redirect("/");
+  } else {
+    next();
+  }
+}
 
 module.exports = function (WS_PORT, app) {
   var routerModule = {
@@ -80,7 +86,7 @@ module.exports = function (WS_PORT, app) {
       });
 
       // Login page
-      Router.get("/login", (req, res) => {
+      Router.get("/login", redirectToHome, (req, res) => {
         const { userId } = req.session;
         debug(userId);
         res.sendFile(__dirname + "/public/login/index.html");

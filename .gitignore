@@ -5,3 +5,4 @@ npm-debug.log
 .replit
 replit.nix
 .gitignore
+sql_cheatsheet.sql

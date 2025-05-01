@@ -6,39 +6,42 @@
     <title>Chat</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link href="/chat/styles.css" rel="stylesheet" type="text/css" />
+    <script defer src="/chat/index.js"></script>
   </head>
 
   <body>
-    <div id="UI">
-      <ul id="userlist"></ul>
-      <div id="chatArea">
-        <titleBar>Sam</titleBar>
-        <div id="messages">
-          <div>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-            <p class="ByMe">Hello</p>
-            <p>Hello again</p>
-          </div>
+    <div id="sidePanel">
+      <div id="settingsBar">
+        <p id="greeting">hello</p>
+        <div id="buttons">
+          <form action="/logout" method="post">
+            <button type="submit" id="logout">Logout</button>
+          </form>
+          <form action="/settings" method="get">
+            <button type="submit" id="settingsButton">Settings</button>
+          </form>
         </div>
       </div>
+      <ul id="userlist"></ul>
     </div>
-    <script src="/chat/index.js"></script>
+    <div id="chatArea">
+      <titleBar>Sam</titleBar>
+      <div id="messages">
+        <p class="ByMe">Hello</p>
+        <p>Hello again</p>
+        <p class="ByMe">
+          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse eius
+          sit odio blanditiis cum suscipit quidem numquam. Aspernatur officiis
+          labore, animi sunt vel ab reiciendis ipsa cum, deleniti quas voluptate
+          quis, laboriosam obcaecati nostrum minus fugit mollitia ipsam? Odio
+          non omnis eum culpa perferendis similique iusto tempora neque ipsam
+          error.
+        </p>
+      </div>
+      <form id="sendMessage" autocomplete="off">
+        <textarea type="text"/></textarea>
+        <button type="submit">Send</button>
+      </form>
+    </div>
   </body>
 </html>

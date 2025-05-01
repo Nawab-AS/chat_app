@@ -51,7 +51,7 @@ const Websocket = new WebSocket.Server({ port: WS_PORT });
 Websocket.on("connection", (client) => {
     console.log("new websocket connection");
     client.on("message", (data) => {
-        debig(data);
+        debug(data);
         try {
             JSON.parse(data);
         } catch(e){ // data is a string

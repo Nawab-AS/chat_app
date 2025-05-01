@@ -1,44 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
 html {
 	height: 100%;
 	width: 100%;
-	font-family: "Comfortaa", sans-serif;
+	font-family: "Roboto", monospace;
 	font-weight: 400;
+	color: #e5e4e0;
 }
 
-#UI {
+body {
 	display: flex;
+	margin: 20px;
 	flex-direction: row;
-	height: calc(100vh - 20px);
+	height: calc(100vh - 40px);
+	box-shadow: 0px 0px 30px #14a722;
+	border-radius: 10px;
+	background-color: black;
+}
+
+#sidePanel {
+	border: 3px solid #14a722;
+	border-radius: 10px 0px 0px 10px;
+	background-color: #383838;
+	display: flex;
+	flex-direction: column;
+	width: 250px;
+}
+
+#settingsBar {
+	background-color: #289013;
+	border-radius: 7px 0px 0px 0px;
+	width: 250px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#settingsBar #greeting {
+	margin: 10px;
+	overflow: hidden;
+	width: 230px;
+	text-align: center;
+}
+
+#settingsBar #buttons {
+	display: flex;
+	align-items: center;
+}
+
+#settingsBar #buttons button {
+	background-color: #14a722;
+	color: #000000;
+	border: 2px solid #000000;
+	border-radius: 5px;
+	padding: 5px;
+	margin: 10px;
+	transition-duration: 0.3s;
+	font-weight: bold;
+}
+
+#settingsBar #buttons button:hover {
+	background-color: #a3a3a3;
 }
 
 #userlist {
-	border: 3px solid black;
-	border-radius: 10px 0px 0px 10px;
-	padding: 0px;
-	margin: 20px 0px 20px 20px;
-	color: #383838;
+	overflow-y: auto;
 	list-style-type: none;
-	display: flex;
-	flex-direction: column;
-	width: 150px;
-	overflow-y: scroll;
-	scrollbar-width: auto;
-	scrollbar-color: #375f8e #375f8e;
+	padding: 0px;
+	margin: 0px;
 }
 
 #userlist li {
 	display: flex;
 	align-items: center;
 	font-size: 17px;
-	overflow-x: scroll;
+	overflow-x: auto;
 	cursor: default;
 	height: 55px;
 	flex-shrink: 0;
+	background-color: #575757;
 	transition-duration: 0.3s;
 }
 
 #userlist icon {
-	background-color: #375f8e;
+	background-color: #a01313;
 	color: #e5e4e0;
 	width: 25px;
 	flex-shrink: 0;
@@ -54,25 +99,24 @@ html {
 }
 
 #userlist li:nth-child(even) {
-	background-color: #eeeeee;
+	background-color: #616161;
 }
 
 #userlist li:hover {
-	background-color: #d2d0cb;
-	border-radius: 7px;
+	background-color: #a3a3a3;
+	color: #000000;
 }
 
 #chatArea {
 	display: flex;
 	flex-direction: column;
-	margin: 20px 20px 20px 0px;
-	border: 3px solid black;
+	justify-content: space-between;
+	border: 3px solid #14a722;
 	border-radius: 0px 10px 10px 0px;
-	padding: 0px;
-	color: #383838;
+	background-color: #383838;
 	width: calc(100% - 150px);
+	border-left: none;
 }
-
 
 #chatArea titleBar {
 	height: 30px;
@@ -80,32 +124,77 @@ html {
 	text-align: center;
 	align-content: center;
 	padding: 5px;
-	color: #e5e4e0;
 	font-weight: 900;
 	background-color: #289013;
 	border-radius: 0px 7px 0px 0px;
+	border-bottom: 2px solid #14a722;
+	box-shadow: 0px 5px 15px #14a722;
 }
+
 
 #messages {
 	flex-grow: 0;
 	overflow-y: auto;
 	padding: 10px;
 	display: flex;
-	flex-direction: column-reverse;
+	flex-direction: column;
 }
 
 #messages p {
 	position: relative;
-	margin: 0 0 10px 0;
-	padding: 5px;
-	border: 2px solid #375f8e;
+	margin: 0px 0px 10px 0px;
+	font-family: "Roboto", monospace;
+	font-size: 13px;
+	padding: 7px;
+	border: 2px solid #14a722;
+	background-color: #1f1f1f;
 	border-radius: 5px;
 	max-width: 80%;
+	width: fit-content;
 	word-wrap: normal;
-	right: -17%;
+	right: auto;
+	text-align: left;
+	margin-left: 10px;
+	line-height: 18px;
 }
 
 #messages p.ByMe {
-	right: 0px;
+	left: auto;
 	text-align: right;
+	margin-left: auto;
+	margin-right: 10px;
+}
+
+#sendMessage {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	height: fit-content;
+	border-top: 2px solid #14a722;
+	box-shadow: 0px -5px 15px #14a722;
+}
+
+#sendMessage textarea {
+	width: calc(100% - 75px);
+	height: 40px;
+	font-family: "Roboto", monospace;
+	border: 0px;
+	padding: 10px;
+	outline: none;
+	font-size: 13px;
+	line-height: 18px;
+	resize: none;
+	overflow-y: auto;
+	background-color: #1f1f1f;
+	color: #e5e4e0;;
+}
+
+#sendMessage button {
+	width: 75px;
+	font-family: "Roboto", monospace;
+	border-radius: 0px 0px 7px 0px;
+	border: 0px;
+	transition-duration: 0.1s;
+	background-color: #289013;
+	color: #000000;
 }
