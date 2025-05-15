@@ -6,13 +6,18 @@
     <title>Chat</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link href="/chat/styles.css" rel="stylesheet" type="text/css" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script defer src="/chat/index.js"></script>
+    <script defer src="/WS-CLIENT.js"></script>
+    <message-template>
+        <p><insert-here></p>
+    </message-template>
   </head>
 
   <body>
     <div id="sidePanel">
       <div id="settingsBar">
-        <p id="greeting">hello</p>
+        <p id="greeting"></p>
         <div id="buttons">
           <form action="/logout" method="post">
             <button type="submit" id="logout">Logout</button>
@@ -26,7 +31,8 @@
     </div>
     <div id="chatArea">
       <titleBar>Sam</titleBar>
-      <div id="messages">
+      <img src="images/loading.gif" alt="loadingGIF" id="loadingGIF" style="display: initial;">
+      <div id="messages" style="display: none;">
         <p class="ByMe">Hello</p>
         <p>Hello again</p>
         <p class="ByMe">
@@ -39,7 +45,7 @@
         </p>
       </div>
       <form id="sendMessage" autocomplete="off">
-        <textarea type="text"/></textarea>
+        <textarea required type="text"/></textarea>
         <button type="submit">Send</button>
       </form>
     </div>

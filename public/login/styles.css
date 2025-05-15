@@ -1,45 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
+
+html {
+  height: 100%;
+}
+
 body {
+  color: #c41c1c;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #191919;
+  height: 100%;
+  background-color: #1c1c1c;
   font-family: sans-serif;
 }
 
 form {
-  border: 5px double #14a722;
-  background-color: #0c0c0c;
+	background-color: #383838;
+  border: 3px solid #14a722;
   padding: 40px;
-  border-radius: 8px;
+  border-radius: 15px;
   text-align: center;
+  box-shadow: 0px 0px 50px #14a722;
+  width: 30vw;
+  min-width: 300px;
 }
 
 h1 {
-  color: #cb2c2d;
   margin-bottom: 40px;
 }
 
 h3 {
-  color: #cb2c2d;
   margin-bottom: 20px;
 }
 
 button {
   margin-top: 15px;
-  background-color: #0d7a17;
   padding: 12px 20px;
-  border: none;
-  border-radius: 4px;
+  border-radius: 7px;
+	background-color: #14a722;
+	color: #000000;
+	border: 2px solid #000000;
+  font-weight: bold;
 }
 
 input {
-  background-color: #0c0c0c;
-  color: #14a722;
+	background-color: #1f1f1f;
+	color: #e5e4e0;
   border: 2px solid #14a722;
   padding: 10px;
   border-radius: 4px;
-  width: 30vw;
+  width: 90%;
   box-sizing: border-box;
   margin-bottom: 10px;
   outline: none;

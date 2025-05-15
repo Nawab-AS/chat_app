@@ -2,17 +2,54 @@ const userlist = document.getElementById("userlist");
 const greeting = document.getElementById("greeting");
 const sendMessage = document.getElementById("sendMessage");
 const textarea = sendMessage.querySelector("textarea");
+const messageArea = document.getElementById("messages");
+const cookies = new URLSearchParams(document.cookie.replaceAll("; ", "&"));
+const messageTemplate = document.getElementsByTagName("message-template").innerHTML;
 
-greeting.innerHTML = localStorage.username;
+
+// load messages
+var messages;
+var currentChat;
+var friends;
+fetch("/chat/api/userdata.json")
+	.then((res) => res.json())
+	.then((data) =>{
+		console.log("loaded",data)
+		messages = data.messages;
+		friends = data.friends;
+		for (let i = 0; i < friends.length -1; i++) {
+			addUser(friends[i]);
+		}
+		loadChat(friends[0]);
+		document.getElementById("loadingGIF").style.display = "none";
+});
+
+
+// UI functions
+greeting.innerHTML = cookies.get("username");
 
 sendMessage.addEventListener("submit", (e) => {
 	e.preventDefault();
-	if (textarea.value == "") return;
+	if (textarea.value == "") return; // don't send empty messages
+	if (!WS_sendData) return; // don't send if not connected to websocket
+	WS_sendData({type: "message", message: textarea.value, to: currentChat, from: cookies.get("username")});
+	textarea.value="";
+	textarea.blur();
 });
 
-textarea.addEventListener('input', () => {
-  //textarea.style.height = `${textarea.scrollHeight-30}px`;
+textarea.addEventListener('keydown', function(event) {
+	if (event.key === 'Enter') {
+		if (event.shiftKey) return; // Allow new line with Shift + Enter
+    event.preventDefault(); // Prevent the default newline
+		sendMessage.dispatchEvent(new Event("submit")) // Trigger the form submission
+  }
 });
+
+function nameClicked(event) {
+	let name = event.target.name || event.target.parentElement.name;
+	console.log(name, "clicked");
+	loadChat(name);
+}
 
 function addUser(username) {
 	var li = document.createElement("li");
@@ -38,15 +75,14 @@ function removeUser(username) {
 	return false;
 }
 
-function nameClicked(event) {
-	let name = event.target.name || event.target.parentElement.name;
-	console.log(name, "clicked");
+function loadChat(name) {
+	document.getElementById("loadingGIF").style.display = "none";
+	document.getElementsByTagName("titlebar")[0].innerHTML = name;
+	document.querySelector("#messages").style.display = "none";
+	
 }
 
-addUser("Sam");
-addUser("Jack");
-addUser("Alice");
-addUser("Mark");
-addUser("John");
-addUser("Martha");
-addUser("MrSuperLongName");
+// Websocket functions
+function setup_WS_client(websocket) {
+	
+}
