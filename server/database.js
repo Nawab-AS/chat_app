@@ -7,7 +7,7 @@ const { Pool } = pkg;
 
 // setup database connection
 const DATABASE_URI = new URL(process.env.DATABASE_URI);
-const pool = new Pool(){
+const pool = new Pool({
   user: DATABASE_URI.username,
   host: DATABASE_URI.host.split(":")[0],
   database: DATABASE_URI.pathname.slice(1),
@@ -83,10 +83,10 @@ export function saveMessage(message, to, from) {
 }
 
 // test
-(async () =>{
-  const result = await queryDatabase("SELECT AUTHENTICATE('MrPotato', 'password123')");
-  console.log(result[0]);
-})()
+// (async () =>{
+//   const result = await queryDatabase("SELECT AUTHENTICATE('MrPotato', 'password123')");
+//   console.log(result[0]);
+// })()
 
 
 //
@@ -96,5 +96,3 @@ export async function onSIGINT() {
   await pool.end();
   console.log('Pool has ended');
 }
-
-process.on('SIGINT', onSIGINT);
