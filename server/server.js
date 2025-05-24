@@ -1,6 +1,6 @@
 import express, { urlencoded } from "express";
 var app = express();
-import { router } from "./routes.js"
+import { router, onSIGINT } from "./routes.js"
 import { runWSserver } from "./WS-server.js"
 const PORT = process.env.PORT || 3000;
 const WS_PORT = process.env.WS_PORT || 3001;
@@ -26,3 +26,11 @@ app.listen(PORT, () => {
 
 // Websocket server
 runWSserver(WS_PORT);
+
+
+// handle SIGINT
+process.on('SIGINT', async ()=>{
+  console.log("\nSIGINT received, shutting down");
+  await onSIGINT();
+  process.exit(0);
+});

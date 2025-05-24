@@ -6,7 +6,7 @@
 import { existsSync } from "fs";
 import { fileURLToPath } from 'url';
 import { dirname, join as joinPath } from 'path';
-import { authenticateLogin, getUserDataFromId } from "./database.js"
+import { authenticateLogin, getUserDataFromId, onSIGINT as onSIGINT_database } from "./database.js"
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import { Router as _router } from "express";
@@ -43,7 +43,7 @@ function verifyToken(req, res){
   try {
     data = jwt.verify(token, SESSION_SECRET);
   } catch (err) {
-    res.clearCookie("authToken")
+    res.clearCookie("authToken");
     return false; // invalid token
   }
   if (!data) return false; // token has no data
@@ -90,11 +90,11 @@ export function router(WS_PORT, app) {
   // Login request
   Router.post("/login", (req, res) => {
     const { username, password } = req.body;
-    const userId = authenticateLogin(username, password);
-    if (!userId) {
+    const userData = authenticateLogin(username, password);
+    if (!userData) {
       return res.redirect("/login?error=1");
     }
-    createToken({userId: userId}, res);
+    createToken({userData: userData}, res);
     res.cookie("username", username, cookieOptions);
     res.redirect("/chat");
   });
@@ -112,9 +112,9 @@ export function router(WS_PORT, app) {
 
   // Chat messages API
   Router.get("/chat/api/userdata.json", (req, res) => {
-    let authData = verifyToken(req, res);
+    const authData = verifyToken(req, res);
     if (!authData) return res.status(401).send("Unauthorized"); // invalid token
-    let userData = getUserDataFromId(authData.userId);
+    let userData = getUserDataFromId(authData.userData.id);
     res.json(userData);
   });
 
@@ -131,3 +131,11 @@ export function router(WS_PORT, app) {
 
   return Router;
 };
+
+
+// handle SIGINT
+export async function onSIGINT() {
+  console.log("closing database connection...");
+  await onSIGINT_database();
+  console.log("database connection closed");
+}

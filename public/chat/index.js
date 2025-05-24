@@ -20,7 +20,7 @@ fetch("/chat/api/userdata.json")
 		for (let i = 0; i < friends.length -1; i++) {
 			addUser(friends[i]);
 		}
-		loadChat(friends[0]);
+		loadChat(friends[0].name);
 		document.getElementById("loadingGIF").style.display = "none";
 });
 
@@ -51,17 +51,18 @@ function nameClicked(event) {
 	loadChat(name);
 }
 
-function addUser(username) {
+function addUser(userData) {
 	var li = document.createElement("li");
 	var icon = document.createElement("icon");
 	var p = document.createElement("p");
-	icon.innerHTML = username.charAt(0).toUpperCase();
-	p.innerHTML = username;
+	icon.innerHTML = userData.name.charAt(0).toUpperCase();
+	p.innerHTML = userData.name;
 	li.appendChild(icon);
 	li.appendChild(p);
 	userlist.appendChild(li);
 
-	li.name = username;
+	li.name = userData.name;
+	li.userId = userData.id;
 	li.addEventListener("click", nameClicked);
 }
 
