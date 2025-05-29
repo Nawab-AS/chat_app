@@ -6,7 +6,7 @@
 import { existsSync } from "fs";
 import { fileURLToPath } from 'url';
 import { dirname, join as joinPath } from 'path';
-import { authenticateLogin, getUserDataFromId, onSIGINT as onSIGINT_database } from "./database.js"
+import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database } from "./database.js"
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import { Router as _router } from "express";
@@ -88,14 +88,13 @@ export function router(WS_PORT, app) {
   });
 
   // Login request
-  Router.post("/login", (req, res) => {
+  Router.post("/login",  async (req, res) => {
     const { username, password } = req.body;
-    const userData = authenticateLogin(username, password);
-    if (!userData) {
+    const userId = await authenticateLogin(username, password);
+    if (!userId) {
       return res.redirect("/login?error=1");
     }
-    createToken({userData: userData}, res);
-    res.cookie("username", username, cookieOptions);
+    createToken({userId: userId}, res);
     res.redirect("/chat");
   });
 
@@ -111,12 +110,22 @@ export function router(WS_PORT, app) {
   });
 
   // Chat messages API
-  Router.get("/chat/api/userdata.json", (req, res) => {
+  Router.get("/api/userdata.json", async (req, res) => {
     const authData = verifyToken(req, res);
     if (!authData) return res.status(401).send("Unauthorized"); // invalid token
-    let userData = getUserDataFromId(authData.userData.id);
-    res.json(userData);
+    res.json(await getUserData(authData.userId[0].user_id));
   });
+
+  Router.get("/api/messages.json", async (req, res) => {
+    const authData = verifyToken(req, res);
+    if (!authData) return res.status(401).send("Unauthorized");
+    
+    const message_count = parseInt(req.query.message_count);
+    if (isNaN(message_count)) return res.status(400).send("Bad Request");
+
+    res.json(await getMessages(authData.userId[0].user_id, message_count));
+  });
+  
 
   // Serve Other files
   Router.use(function (req, res) {

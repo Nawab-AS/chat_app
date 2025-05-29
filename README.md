@@ -7,10 +7,17 @@ The purpose of this project is to allow me to independantly learn how to use web
 
 # Installation 
 
-Install this repository through git by
+1. Install this repository through git by
 ```
 git clone https://github.com/Nawab-AS/chat_app.git
+cd ./chat_app
 ```
+
+2. install node modules by
+```
+npm i
+```
+
 
 # Usage
 

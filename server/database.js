@@ -4,6 +4,7 @@
 
 import pkg from "pg";
 const { Pool } = pkg;
+import 'dotenv/config'
 
 // setup database connection
 const DATABASE_URI = new URL(process.env.DATABASE_URI);
@@ -15,81 +16,46 @@ const pool = new Pool({
   port: DATABASE_URI.port,
   max: 20,
   idleTimeoutMillis: 30000,
-  ssl: { // TODO: remove this in production (SECURITY RISK)
+  ssl: {
     rejectUnauthorized: false
   }
 });
 
 delete DATABASE_URI.password;
 
-async function queryDatabase(query) {
-  let client;
+// low-level db functions
+async function queryDatabase(query, params=[]) {
   try {
-    client = await pool.connect();
-    const result = await client.query(query);
+    const result = await pool.query(query, params);
     return result.rows;
-  } catch (e) {
-    console.error(e);
-  } finally {
-    if (client) client.release();
+  } catch (err) {
+    console.error(err);
   }
 }
 
 
 // high-level db functions
-export function authenticateLogin(username, password) {
+export async function authenticateLogin(username, password) {
   if (!username || !password) return false;
-  let userData = getUserDataFromUsername(username);
-  if (!userData) return false; // invalid username
-  
-  if (userData.password === password) {
-    return userData;
-  }
+  const userData = await queryDatabase("SELECT chat.AUTHENTICATE($1, $2)", [username, password]);
+  if (userData[0].authenticate) return await queryDatabase("SELECT user_id FROM chat.USERS WHERE username = $1", [username]);
   return false;
 }
 
-function getUserDataFromUsername(username) {
-  // TODO: connect to database
-  let users = queryDatabase("SELECT * FROM users WHERE username = $1");
-  let user = users.find((user) => user.username === username);
-  if (user) return user;
-  return false;
+export async function getUserData(user_id) {
+  return {userData: (await queryDatabase("SELECT * FROM chat.USERDATA($1)", [user_id]))[0],
+    friends: (await queryDatabase("SELECT * FROM chat.GET_FRIEND_DATA($1)", [user_id]))};
 }
 
-export function getUserDataFromId(userId) {
-  // TODO: connect to database
-  return {messages: getUserchats(userId), friends: [{name: "billy101", id: 2}, {name: "max469", id: 3}]};
+
+export async function getMessages(user_id, message_count) {
+  return (await queryDatabase("SELECT * FROM chat.get_messages($1, $2)", [user_id, message_count]));
 }
 
-function getUserFriends(userId) {
+export async function saveMessage(message, to, from) {
   // TODO: connect to database
-  let userFriends = friends.filter((friend) => friend.user1 === userId || friend.user2 === userId);
-  userFriends.forEach((friend) => {
-    if (friend.user1 === userId) {
-    } else if (friend.user2 === userId) {
-    }
-  })
+  //messages.push({ message: message, from: from, to: to});
 }
-
-function getUserchats(userId) {
-  // TODO: connect to database
-  let userMessages = messages.filter((message) => message.from === userId || message.to === userId);
-  return userMessages;
-}
-
-export function saveMessage(message, to, from) {
-  // TODO: connect to database
-  messages.push({ message: message, from: from, to: to});
-}
-
-// test
-// (async () =>{
-//   const result = await queryDatabase("SELECT AUTHENTICATE('MrPotato', 'password123')");
-//   console.log(result[0]);
-// })()
-
-
-//
 
 // handle SIGINT
 export async function onSIGINT() {

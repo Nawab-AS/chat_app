@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
 
-head {
-	display: none;
+/****** animations ******/
+
+@keyframes reveal {
+	from {opacity: 0;}
+	to {opacity: 1;}
 }
 
-html {
-	height: 100%;
-	width: 100%;
-	font-family: "Roboto", monospace;
-	font-weight: 400;
-	color: #e5e4e0;
+/****** styles ******/
+head {
+	display: none;
 }
 
 body {
@@ -19,7 +19,8 @@ body {
 	height: calc(100vh - 40px);
 	box-shadow: 0px 0px 30px #14a722;
 	border-radius: 10px;
-	background-color: black;
+
+	animation: 0.5s 0.5s 1 steps(5) reveal forwards;
 }
 
 #sidePanel {

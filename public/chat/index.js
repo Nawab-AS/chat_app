@@ -5,33 +5,35 @@ const textarea = sendMessage.querySelector("textarea");
 const messageArea = document.getElementById("messages");
 const cookies = new URLSearchParams(document.cookie.replaceAll("; ", "&"));
 const messageTemplate = document.getElementsByTagName("message-template").innerHTML;
+var currentChat;
+var messages;
+var friends;
+var userData;
 
 
 // load messages
-var messages;
-var currentChat;
-var friends;
-fetch("/chat/api/userdata.json")
+fetch("/api/userdata.json")
 	.then((res) => res.json())
 	.then((data) =>{
-		console.log("loaded",data)
-		messages = data.messages;
+		console.log("loaded userdata", data);
+		userData = data.userData;
+		greeting.innerHTML = "Hello, " + userData.username;
 		friends = data.friends;
 		for (let i = 0; i < friends.length -1; i++) {
 			addUser(friends[i]);
 		}
-		loadChat(friends[0].name);
-		document.getElementById("loadingGIF").style.display = "none";
+		loadChat(friends[0].username);
+		document.getElementById("loadingGIF").style = "none";
+		messageArea.style = "";
 });
 
 
 // UI functions
-greeting.innerHTML = cookies.get("username");
 
 sendMessage.addEventListener("submit", (e) => {
 	e.preventDefault();
-	if (textarea.value == "") return; // don't send empty messages
-	if (!WS_sendData) return; // don't send if not connected to websocket
+	if (!WS_sendData) return;
+	if (textarea.value == "") return;
 	WS_sendData({type: "message", message: textarea.value, to: currentChat, from: cookies.get("username")});
 	textarea.value="";
 	textarea.blur();
@@ -55,14 +57,14 @@ function addUser(userData) {
 	var li = document.createElement("li");
 	var icon = document.createElement("icon");
 	var p = document.createElement("p");
-	icon.innerHTML = userData.name.charAt(0).toUpperCase();
-	p.innerHTML = userData.name;
+	icon.innerHTML = userData.username.charAt(0).toUpperCase();
+	p.innerHTML = userData.username;
 	li.appendChild(icon);
 	li.appendChild(p);
 	userlist.appendChild(li);
 
-	li.name = userData.name;
-	li.userId = userData.id;
+	li.name = userData.username;
+	li.userId = userData.user_id;
 	li.addEventListener("click", nameClicked);
 }
 
@@ -80,7 +82,7 @@ function loadChat(name) {
 	document.getElementById("loadingGIF").style.display = "none";
 	document.getElementsByTagName("titlebar")[0].innerHTML = name;
 	document.querySelector("#messages").style.display = "none";
-	
+	//messageArea.innerHTML = "";
 }
 
 // Websocket functions

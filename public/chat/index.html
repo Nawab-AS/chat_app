@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html style="height: 100%;width: 100%;font-family: 'Roboto', monospace;font-weight: 400;color: #e5e4e0;background-color: black;">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -9,15 +9,12 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script defer src="/chat/index.js"></script>
     <script defer src="/WS-CLIENT.js"></script>
-    <message-template>
-        <p><insert-here></p>
-    </message-template>
   </head>
 
-  <body>
+  <body style="opacity: 0;">
     <div id="sidePanel">
       <div id="settingsBar">
-        <p id="greeting"></p>
+        <p id="greeting">Hello</p>
         <div id="buttons">
           <form action="/logout" method="post">
             <button type="submit" id="logout">Logout</button>
