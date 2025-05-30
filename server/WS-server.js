@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
-import * as ws from "ws";
+import { WebSocketServer } from 'ws';
 import 'dotenv/config'
 import { Filter } from 'bad-words';
 const filter = new Filter();
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
 
-export const runWSserver = (WS_PORT, saveMessage) => {
-	const Websocket = new ws.WebSocketServer({ port: WS_PORT });
+export const runWSserver = (server, saveMessage) => {
+	const Websocket = new WebSocketServer({ server });
 	var onlineUsers = {};
 
 	Websocket.on("connection", (client) => {
@@ -31,7 +31,7 @@ export const runWSserver = (WS_PORT, saveMessage) => {
 						} else {
 							onlineUsers[userId] = [client];
 						}
-				  } catch (err) { // close on invalid token
+				  } catch (err) {
 				    client.close();
 				  }
 				}
@@ -53,5 +53,4 @@ export const runWSserver = (WS_PORT, saveMessage) => {
 			} catch (e) {return}
 		})
 	});
-	console.log("websocket listening on *:" + WS_PORT);
 };

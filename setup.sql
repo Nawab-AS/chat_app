@@ -37,17 +37,17 @@ RETURNS BOOL
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    v_stored_password VARCHAR(32);
+		v_stored_password VARCHAR(32);
 BEGIN
-    SELECT password INTO v_stored_password
-    FROM chat.USERS
-    WHERE username = p_username;
+		SELECT password INTO v_stored_password
+		FROM chat.USERS
+		WHERE username = p_username;
 
-    IF FOUND AND v_stored_password = p_password THEN
-        RETURN TRUE;
-    ELSE
-        RETURN FALSE;
-    END IF;
+		IF FOUND AND v_stored_password = p_password THEN
+				RETURN TRUE;
+		ELSE
+				RETURN FALSE;
+		END IF;
 END;
 $$;
 
@@ -68,8 +68,8 @@ CREATE PROCEDURE chat.DEL_USER (p_user_id INT, p_password VARCHAR)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    DELETE FROM chat.USERS
-    WHERE (user_id = p_user_id AND password = p_password);
+		DELETE FROM chat.USERS
+		WHERE (user_id = p_user_id AND password = p_password);
 END;
 $$;
 
@@ -84,9 +84,9 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    RETURN QUERY
+		RETURN QUERY
 	SELECT u.user_id, u.username, u.user_created_at FROM chat.USERS u
-    WHERE u.user_id = p_user_id;
+		WHERE u.user_id = p_user_id;
 END;
 $$;
 
@@ -115,7 +115,7 @@ $$;
 
 
 -- SELECT * FROM chat.GET_MESSAGES
-CREATE chat.GET_MESSAGES (p_user_id INT, p_user_id2 INT, p_message_count INT)
+CREATE FUNCTION chat.GET_MESSAGES (p_user_id INT, p_user_id2 INT, p_message_count INT)
 RETURNS SETOF chat.MESSAGES
 LANGUAGE plpgsql
 AS $$
@@ -123,8 +123,8 @@ BEGIN
 	RETURN QUERY
 	SELECT * FROM chat.MESSAGES m
 		WHERE ( (m.sender_id = p_user_id AND m.recever_id = p_user_id2) OR
-			    (m.sender_id = p_user_id2 AND m.recever_id = p_user_id) )
-		ORDER BY m.sent_at DESC LIMIT 25 OFFSET (p_message_count * 25);
+					(m.sender_id = p_user_id2 AND m.recever_id = p_user_id) )
+		ORDER BY m.sent_at DESC LIMIT 50 OFFSET (p_message_count * 50);
 END;
 $$;
 
@@ -170,28 +170,27 @@ $$;
 -- SELECT * FROM chat.GET_FRIEND_DATA(<user_id>)
 CREATE FUNCTION chat.GET_FRIEND_DATA(p_user_id INT)
 RETURNS TABLE (
-    user_id             INT,
-    username            VARCHAR(32),
-    created_at          TIMESTAMP,
-    request_accepted    BOOLEAN,
-    initiated_by_me     BOOLEAN
+		user_id             INT,
+		username            VARCHAR(32),
+		created_at          TIMESTAMP,
+		request_accepted    BOOLEAN,
+		initiated_by_me     BOOLEAN
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    RETURN QUERY
-    SELECT u.user_id, u.username, u.user_created_at, f.request_accepted,
-        CASE
-            WHEN f.friend1 = p_user_id THEN TRUE
-            ELSE FALSE
-        END AS initiated_by_me
-    FROM
-        chat.USERS u
-    JOIN
-        chat.FRIENDS f ON (
-            (u.user_id = f.friend2 AND f.friend1 = p_user_id) OR
-            (u.user_id = f.friend1 AND f.friend2 = p_user_id)
-        );
+		RETURN QUERY
+		SELECT u.user_id, u.username, u.user_created_at, f.request_accepted,
+				CASE
+						WHEN f.friend1 = p_user_id THEN TRUE
+						ELSE FALSE
+				END AS initiated_by_me
+		FROM
+				chat.USERS u
+		JOIN
+				chat.FRIENDS f ON (
+						(u.user_id = f.friend2 AND f.friend1 = p_user_id) OR
+						(u.user_id = f.friend1 AND f.friend2 = p_user_id)
+				);
 END;
 $$;
-

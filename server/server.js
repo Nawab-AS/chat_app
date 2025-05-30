@@ -1,25 +1,20 @@
 import express, { urlencoded } from "express";
-var app = express();
-import { router, onSIGINT } from "./routes.js"
+import { createServer } from 'http'
+import { router, onSIGINT, saveMessage} from "./routes.js"
+import { runWSserver } from "./WS-server.js"
 const PORT = process.env.PORT || 3000;
-const WS_PORT = process.env.WS_PORT || 3001;
-const dev = process.env.ENVIRONMENT == "DEV";
+var app = express();
 
-// debug logs
-function debug(message) {
-  if (dev) {
-    console.log(message);
-  }
-}
-debug("DEVELOPMENT MODE");
 
 // use routes.js for routes
 app.use(urlencoded({extended:true}));
-app.use("/", router(WS_PORT, app));
 
 // listen fot https requests
-app.listen(PORT, () => {
-    console.log("express listening on *:" + PORT);
+router(app);
+const server = createServer(app);
+runWSserver(server, saveMessage);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log("express and websocket listening on *:" + PORT);
 });
 
 

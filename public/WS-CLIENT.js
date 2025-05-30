@@ -1,8 +1,8 @@
 let WS_sendData = undefined;
-fetch("/WS-PORT").then((res) => res.text()).then((port) => { // get the port from the server
+if (true) { // create a hidden scope
     let connect = () => {
         // Connect to the WebSocket server
-        const websocketURL = "wss://" + window.location.hostname + ":" + port;
+        const websocketURL = "wss://" + window.location.hostname +(window.location.port != '' ? ":" + window.location.port: '');
         let websocket;
         try {
             websocket = new WebSocket(websocketURL);
@@ -37,5 +37,4 @@ fetch("/WS-PORT").then((res) => res.text()).then((port) => { // get the port fro
     };
     
     connect();
-});
-
+};

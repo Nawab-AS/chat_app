@@ -6,12 +6,9 @@
 import { existsSync } from "fs";
 import { fileURLToPath } from 'url';
 import { dirname, join as joinPath } from 'path';
-import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database, saveMessage } from "./database.js"
-import { runWSserver } from "./WS-server.js"
+import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database, saveMessage as _saveMessages} from "./database.js"
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
-import { Router as _router } from "express";
-const Router = _router();
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
 // get the directory of this file
@@ -69,29 +66,27 @@ const redirectToHome = (req, res, next) => {
 };
 
 
-export function router(WS_PORT, app) {
-  runWSserver(WS_PORT, saveMessage); // start websocket server
-
+export function router(app) {
   // use session middleware
   app.use(cookieParser());
 
   // Home page
-  Router.get("/", redirectToLogin, (req, res) => {
+  app.get("/", redirectToLogin, (req, res) => {
     res.sendFile(__publicDirname + "/chat/index.html");
   });
 
   // Chat page
-  Router.get("/chat", redirectToLogin, (req, res) => {
+  app.get("/chat", redirectToLogin, (req, res) => {
     res.sendFile(__publicDirname + "/chat/index.html");
   });
 
   // Login page
-  Router.get("/login", redirectToHome, (req, res) => {
+  app.get("/login", redirectToHome, (req, res) => {
     res.sendFile(__publicDirname + "/login/index.html");
   });
 
   // Login request
-  Router.post("/login",  async (req, res) => {
+  app.post("/login",  async (req, res) => {
     const { username, password } = req.body;
     const userId = await authenticateLogin(username, password);
     if (!userId) {
@@ -102,24 +97,19 @@ export function router(WS_PORT, app) {
   });
 
   // Logout request
-  Router.post("/logout", (req, res) => {
+  app.post("/logout", (req, res) => {
     res.clearCookie("authToken");
     res.redirect("/login")
   });
 
-  // WS Port api
-  Router.get("/WS-PORT", (req, res) => {
-    res.send(WS_PORT + "");
-  });
-
   // Chat messages API
-  Router.get("/api/userdata.json", async (req, res) => {
+  app.get("/api/userdata.json", async (req, res) => {
     const authData = verifyToken(req, res);
     if (!authData) return res.status(401).send("Unauthorized"); // invalid token
     res.json(await getUserData(authData.userId[0].user_id));
   });
 
-  Router.get("/api/messages.json", async (req, res) => {
+  app.get("/api/messages.json", async (req, res) => {
     const authData = verifyToken(req, res);
     if (!authData) return res.status(401).send("Unauthorized");
     
@@ -132,7 +122,7 @@ export function router(WS_PORT, app) {
   
 
   // Serve Other files
-  Router.use(function (req, res) {
+  app.use(function (req, res) {
     if (existsSync(__publicDirname + req.url)) {
       // send file if path exists
       res.sendFile(__publicDirname + req.url);
@@ -141,8 +131,6 @@ export function router(WS_PORT, app) {
       res.status(404).sendFile(__publicDirname + "/404.html");
     }
   });
-
-  return Router;
 };
 
 
@@ -152,3 +140,5 @@ export async function onSIGINT() {
   await onSIGINT_database();
   console.log("database connection closed");
 }
+
+export { _saveMessages as saveMessage };
