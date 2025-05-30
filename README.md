@@ -5,7 +5,7 @@
 This is a simple chat app that uses websockets, and a postgreSQL database.
 The purpose of this project is to allow me to independantly learn how to use websockets and postgres.
 
-# Installation 
+## Installation 
 
 1. Install this repository through git by
 ```
@@ -19,7 +19,7 @@ npm i
 ```
 
 
-# Usage
+## Usage
 
 1.  Create a postgreSQL database
 
@@ -40,3 +40,7 @@ optionally you can also use the heroku cli as well with
 ```
 heroku local
 ```
+
+## Questions or Concerns
+
+For any questions or concerns please email me at nawab-as@hackclub.app

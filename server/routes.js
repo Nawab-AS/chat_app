@@ -6,7 +6,8 @@
 import { existsSync } from "fs";
 import { fileURLToPath } from 'url';
 import { dirname, join as joinPath } from 'path';
-import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database } from "./database.js"
+import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database, saveMessage } from "./database.js"
+import { runWSserver } from "./WS-server.js"
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import { Router as _router } from "express";
@@ -69,6 +70,8 @@ const redirectToHome = (req, res, next) => {
 
 
 export function router(WS_PORT, app) {
+  runWSserver(WS_PORT, saveMessage); // start websocket server
+
   // use session middleware
   app.use(cookieParser());
 
@@ -120,10 +123,11 @@ export function router(WS_PORT, app) {
     const authData = verifyToken(req, res);
     if (!authData) return res.status(401).send("Unauthorized");
     
-    const message_count = parseInt(req.query.message_count);
-    if (isNaN(message_count)) return res.status(400).send("Bad Request");
+    const message_count = parseInt(req.query.msg_count);
+    const to = parseInt(req.query.to);
+    if (isNaN(message_count) || isNaN(to)) return res.status(400).send("Bad Request");
 
-    res.json(await getMessages(authData.userId[0].user_id, message_count));
+    res.json(await getMessages([authData.userId[0].user_id, to], message_count));
   });
   
 

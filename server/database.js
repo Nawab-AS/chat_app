@@ -49,13 +49,19 @@ export async function getUserData(user_id) {
 
 
 export async function getMessages(user_id, message_count) {
-  return (await queryDatabase("SELECT * FROM chat.get_messages($1, $2)", [user_id, message_count]));
+  return (await queryDatabase("SELECT * FROM chat.get_messages($1, $2, $3)", [user_id[0], user_id[1], message_count]));
 }
 
 export async function saveMessage(message, to, from) {
-  // TODO: connect to database
-  //messages.push({ message: message, from: from, to: to});
+  await queryDatabase("CALL chat.ADD_MESSAGE($1, $2, $3)", [message, from, to]);
 }
+
+
+// test
+// (async ()=>{
+//   console.table(await queryDatabase("SELECT * FROM chat.GET_FRIEND_DATA(11)"));
+// })();
+
 
 // handle SIGINT
 export async function onSIGINT() {

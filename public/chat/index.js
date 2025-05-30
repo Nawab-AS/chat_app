@@ -4,7 +4,6 @@ const sendMessage = document.getElementById("sendMessage");
 const textarea = sendMessage.querySelector("textarea");
 const messageArea = document.getElementById("messages");
 const cookies = new URLSearchParams(document.cookie.replaceAll("; ", "&"));
-const messageTemplate = document.getElementsByTagName("message-template").innerHTML;
 var currentChat;
 var messages;
 var friends;
@@ -19,38 +18,39 @@ fetch("/api/userdata.json")
 		userData = data.userData;
 		greeting.innerHTML = "Hello, " + userData.username;
 		friends = data.friends;
-		for (let i = 0; i < friends.length -1; i++) {
+		currentChat = friends[0].user_id;
+		for (let i = 0; i < friends.length; i++) {
 			addUser(friends[i]);
 		}
-		loadChat(friends[0].username);
-		document.getElementById("loadingGIF").style = "none";
-		messageArea.style = "";
+		loadChat(friends[0].username, friends[0].user_id);
+		document.getElementById("loadingGIF").style.display = "none";
+		messageArea.style.display = "flex";
 });
 
 
 // UI functions
 
-sendMessage.addEventListener("submit", (e) => {
-	e.preventDefault();
+function onSendMessage() {
 	if (!WS_sendData) return;
 	if (textarea.value == "") return;
-	WS_sendData({type: "message", message: textarea.value, to: currentChat, from: cookies.get("username")});
+	WS_sendData({type: "message", message: textarea.value, to: currentChat, from: userData.user_id});
 	textarea.value="";
-	textarea.blur();
-});
+};
 
 textarea.addEventListener('keydown', function(event) {
 	if (event.key === 'Enter') {
 		if (event.shiftKey) return; // Allow new line with Shift + Enter
     event.preventDefault(); // Prevent the default newline
-		sendMessage.dispatchEvent(new Event("submit")) // Trigger the form submission
+		document.getElementById("sendMessageButton").click() // Trigger the form submission
   }
 });
 
 function nameClicked(event) {
 	let name = event.target.name || event.target.parentElement.name;
+	let user_id = event.target.user_id || event.target.parentElement.user_id;
 	console.log(name, "clicked");
-	loadChat(name);
+	currentChat = user_id;
+	loadChat(name, user_id);
 }
 
 function addUser(userData) {
@@ -64,7 +64,7 @@ function addUser(userData) {
 	userlist.appendChild(li);
 
 	li.name = userData.username;
-	li.userId = userData.user_id;
+	li.user_id = userData.user_id;
 	li.addEventListener("click", nameClicked);
 }
 
@@ -78,14 +78,57 @@ function removeUser(username) {
 	return false;
 }
 
-function loadChat(name) {
-	document.getElementById("loadingGIF").style.display = "none";
+function loadChat(name, id, msgCount=0) {
+	document.getElementById("loadingGIF").style.display = "block";
+	messageArea.style.display = "none";
+	userlist.querySelectorAll("li").forEach((li) => {
+		li.id = name == li.name ? "selected":"";
+	})
+	
 	document.getElementsByTagName("titlebar")[0].innerHTML = name;
-	document.querySelector("#messages").style.display = "none";
-	//messageArea.innerHTML = "";
+	messageArea.innerHTML = "";
+	currentChat = id;
+	fetch(`/api/messages.json?msg_count=${msgCount}&to=${id}`)
+		.then((res) => res.json())
+		.then((data) =>{
+			//console.log("loaded messages", data);
+			messages = data.sort((a, b) => Math.sign(Date.parse(a.sent_at) - Date.parse(b.sent_at)));
+			for (let i = 0; i < messages.length; i++) {
+				addMessage(messages[i].message_text, messages[i].sender_id == userData.user_id);
+			}
+			messageArea.scrollTo(0, messageArea.scrollHeight+1000000);
+			
+			document.getElementById("loadingGIF").style.display = "none";
+			messageArea.style.display = "flex";
+
+		});
+}
+
+function addMessage(message, byMe){
+	const p = document.createElement("p");
+	if (byMe) p.classList.add("ByMe");
+	p.innerHTML = message;
+	messageArea.appendChild(p);
 }
 
 // Websocket functions
 function setup_WS_client(websocket) {
-	
+	websocket.addEventListener("message", (rawData)=>{
+		let data;
+		try {
+			data = JSON.parse(rawData.data);
+		} catch (e) {return}
+
+		if (data.type == "message") {
+			if (data.from == currentChat || data.to == currentChat) {
+				addMessage(data.message, data.to == currentChat);
+			}
+			if (data.from != currentChat){
+				// TODO: notify user
+			}
+			if(data.from == userData.user_id){
+				messageArea.scrollTo({top: messageArea.scrollHeight+1000000, behavior: "smooth"});
+			}
+		}
+	})
 }

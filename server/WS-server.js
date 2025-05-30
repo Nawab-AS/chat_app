@@ -1,16 +1,19 @@
 import jwt from 'jsonwebtoken';
 import * as ws from "ws";
-import { saveMessage } from "./database.js"
+import 'dotenv/config'
+import { Filter } from 'bad-words';
+const filter = new Filter();
 const SESSION_SECRET = process.env.SESSION_SECRET;
 
 
-export const runWSserver = (WS_PORT) => {
+export const runWSserver = (WS_PORT, saveMessage) => {
 	const Websocket = new ws.WebSocketServer({ port: WS_PORT });
+	var onlineUsers = {};
 
 	Websocket.on("connection", (client) => {
 		let auth = false;
-		setTimeout(() => {if (!auth) client.close()}, 10_000); // close connection if not authenticated after 10 seconds
-		console.log("new websocket connection");
+		let userId = undefined;
+		
 		client.on("message", (rawData) => {
 			let data;
 			try {
@@ -22,33 +25,33 @@ export const runWSserver = (WS_PORT) => {
 					try {
 				    data = jwt.verify(data.token, SESSION_SECRET);
 						if (data) auth = true;
+						userId = data.userId[0].user_id;
+						if (userId in onlineUsers){
+							onlineUsers[userId].push(client);
+						} else {
+							onlineUsers[userId] = [client];
+						}
 				  } catch (err) { // close on invalid token
 				    client.close();
 				  }
 				}
+				return;
 			} else {
 				if (data.type == "message") {
-					saveMessage(data.message, data.to, data.from);
+					let message = {type: "message", message: filter.clean(data.message), from: data.from, to: data.to}
+					saveMessage(message.message, data.to, data.from);
+					message = JSON.stringify(message);
+					client.send(message);
+					if(data.to in onlineUsers) onlineUsers[data.to].forEach((to)=>to.send(message));
 				}
 			}
 		});
-		/*client.on("message", (data) => {
-        debug(data);
-        try {
-            JSON.parse(data);
-        } catch(e){ // data is a string
-            return;
-        }
-        // data is a json object
-        let packet = JSON.parse(data);
-        debug("json");
-        if (packet.type == "echo") {
-            Websocket.clients.forEach((otherClient) => {
-                otherClient.send(packet.data);
-            });
-        }
-        console.log("received: %s", packet);
-    });*/
+
+		client.on("close", () =>{
+			try {
+					onlineUsers[userId].splice(onlineUsers[userId].indexOf(client), -1);
+			} catch (e) {return}
+		})
 	});
 	console.log("websocket listening on *:" + WS_PORT);
 };

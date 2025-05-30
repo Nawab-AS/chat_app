@@ -30,20 +30,10 @@
       <titleBar>Sam</titleBar>
       <img src="images/loading.gif" alt="loadingGIF" id="loadingGIF" style="display: initial;">
       <div id="messages" style="display: none;">
-        <p class="ByMe">Hello</p>
-        <p>Hello again</p>
-        <p class="ByMe">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Esse eius
-          sit odio blanditiis cum suscipit quidem numquam. Aspernatur officiis
-          labore, animi sunt vel ab reiciendis ipsa cum, deleniti quas voluptate
-          quis, laboriosam obcaecati nostrum minus fugit mollitia ipsam? Odio
-          non omnis eum culpa perferendis similique iusto tempora neque ipsam
-          error.
-        </p>
       </div>
-      <form id="sendMessage" autocomplete="off">
-        <textarea required type="text"/></textarea>
-        <button type="submit">Send</button>
+      <form id="sendMessage" autocomplete="off" onsubmit="onSendMessage(); return false;">
+        <textarea required type="text" maxlength="1000" placeholder="Type a message..."/></textarea>
+        <button id="sendMessageButton" type="submit">Send</button>
       </form>
     </div>
   </body>

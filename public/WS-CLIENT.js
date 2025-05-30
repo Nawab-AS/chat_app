@@ -23,6 +23,7 @@ fetch("/WS-PORT").then((res) => res.text()).then((port) => { // get the port fro
             }
             
             websocket.addEventListener("close", () => {
+                console.log("WebSocket connection closed, attempting to reconnect...");
                 WS_sendData = undefined;
                 connect();
                 if (typeof close_WS_client === 'function') {
