@@ -43,6 +43,11 @@ button {
   font-weight: bold;
 }
 
+button:disabled {
+  background-color: #178222;
+  cursor: not-allowed
+}
+
 input {
 	background-color: #1f1f1f;
 	color: #e5e4e0;
@@ -66,4 +71,13 @@ input {
 #error p {
   margin: 0px;
   color: #757575;
+}
+
+a {
+  color: #14a722;
+}
+
+a:hover {
+  color: #14a722;
+  text-decoration-style: wavy;
 }

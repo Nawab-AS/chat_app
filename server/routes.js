@@ -3,13 +3,18 @@
 // This is the routing module
 //     for the server.
 
-import { existsSync } from "fs";
+import { existsSync, readFile } from "fs";
 import { fileURLToPath } from 'url';
+import axios from 'axios';
+import bodyParser from "body-parser"
 import { dirname, join as joinPath } from 'path';
 import { authenticateLogin, getUserData, getMessages, onSIGINT as onSIGINT_database, saveMessage as _saveMessages} from "./database.js"
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
+import 'dotenv/config'
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const CAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET_KEY;
+const CAPTCHA_SITE_KEY = process.env.CAPTCHA_SITE_KEY;
 
 // get the directory of this file
 const __filename = fileURLToPath(import.meta.url);
@@ -69,11 +74,16 @@ const redirectToHome = (req, res, next) => {
 export function router(app) {
   // use session middleware
   app.use(cookieParser());
+  app.use(bodyParser.urlencoded({ extended: true }));
 
-  // Home page
-  app.get("/", redirectToLogin, (req, res) => {
-    res.sendFile(__publicDirname + "/chat/index.html");
-  });
+  // Home page (will always redirect to login or chat)
+  app.get("/", (req, res, _) => {
+    if (verifyToken(req, res)) {
+      res.redirect("/chat");
+    } else {
+      res.redirect("/login");
+    }
+  }, (req, res) => {});
 
   // Chat page
   app.get("/chat", redirectToLogin, (req, res) => {
@@ -81,20 +91,62 @@ export function router(app) {
   });
 
   // Login page
+  let loginStr = "";
+  const useCaptcha = (CAPTCHA_SITE_KEY && CAPTCHA_SECRET_KEY)
+  readFile(joinPath(__publicDirname, "/login/index.html"), (err, file)=>{
+    if (err) throw new Error(err);
+    
+    if (useCaptcha) {
+      loginStr = file.toString().replace("<site-key>", CAPTCHA_SITE_KEY);
+    } else {
+      console.warn("WARNING: captcha site key and/or secret key is not set, captcha will not be used");
+      loginStr = file.toString().split(/<captcha>(.|\n)*?<\/captcha>/).join("");
+    }
+  });
   app.get("/login", redirectToHome, (req, res) => {
-    res.sendFile(__publicDirname + "/login/index.html");
+    res.send(loginStr);
   });
 
   // Login request
   app.post("/login",  async (req, res) => {
+    const turnstileToken = req.body['cf-turnstile-response'];
     const { username, password } = req.body;
-    const userId = await authenticateLogin(username, password);
-    if (!userId) {
-      return res.redirect("/login?error=1");
+
+    try {      
+      const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        secret: CAPTCHA_SECRET_KEY,
+        response: turnstileToken
+      }, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}});
+      
+      if (!response.data.success) return res.redirect("/login?error=2"); // captcha failed
+
+      // captcha passed, authenticate user
+      if (!username || !password) return res.redirect("/login?error=1");
+      const userId = await authenticateLogin(username, password);
+      if (!userId) return res.redirect("/login?error=1");
+      createToken({userId: userId}, res);
+      res.redirect("/chat");
+    } catch (error) {
+      console.error('Error verifying Turnstile:', error.message);
+      res.redirect("/login?error=2"); // captcha failed
     }
-    createToken({userId: userId}, res);
-    res.redirect("/chat");
   });
+
+  // signup page
+  app.get("/signup", redirectToHome, (req, res) => {
+    res.sendFile(__publicDirname + "/signup/index.html");
+  });
+
+  // signup request
+  // app.post("/login",  async (req, res) => {
+  //   const { username, password } = req.body;
+  //   const userId = await authenticateLogin(username, password);
+  //   if (!userId) {
+  //     return res.redirect("/login?error=1");
+  //   }
+  //   createToken({userId: userId}, res);
+  //   res.redirect("/chat");
+  // });
 
   // Logout request
   app.post("/logout", (req, res) => {
@@ -120,7 +172,6 @@ export function router(app) {
     res.json(await getMessages([authData.userId[0].user_id, to], message_count));
   });
   
-
   // Serve Other files
   app.use(function (req, res) {
     if (existsSync(__publicDirname + req.url)) {

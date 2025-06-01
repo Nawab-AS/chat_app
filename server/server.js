@@ -1,13 +1,15 @@
 import express, { urlencoded } from "express";
 import { createServer } from 'http'
+import bodyParser from "body-parser";
 import { router, onSIGINT, saveMessage} from "./routes.js"
 import { runWSserver } from "./WS-server.js"
+import 'dotenv/config'
 const PORT = process.env.PORT || 3000;
 var app = express();
 
 
-// use routes.js for routes
-app.use(urlencoded({extended:true}));
+// setup middleware
+
 
 // listen fot https requests
 router(app);

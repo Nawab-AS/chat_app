@@ -1,10 +1,12 @@
-if (new URLSearchParams(document.location.search).get("error")){
-	errorBox = document.getElementById("error");
+let error = new URLSearchParams(document.location.search).get("error")
+let errorBox = document.getElementById("error");
+
+if (error == 1){
 	errorBox.style.display = "block";
-	errorBox.children[0].innerHTML = "Invalid username or password";
+	errorBox.children[0].innerHTML = "Invalid Username or Password";
 }
 
-const form = document.getElementById("form");
-form.addEventListener("submit", (event) =>{
-	localStorage.username = form.username.value;
-});
+if (error == 2){
+	errorBox.style.display = "block";
+	errorBox.children[0].innerHTML = "Captcha Failed";
+}

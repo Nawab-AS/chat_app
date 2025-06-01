@@ -96,18 +96,26 @@ function loadChat(name, id, msgCount=0) {
 			for (let i = 0; i < messages.length; i++) {
 				addMessage(messages[i].message_text, messages[i].sender_id == userData.user_id);
 			}
-			messageArea.scrollTo(0, messageArea.scrollHeight+1000000);
+			
+			messageArea.scrollTo({top: messageArea.scrollHeight+1000000, behavior: "smooth"});
+			bottomElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
 			
 			document.getElementById("loadingGIF").style.display = "none";
 			messageArea.style.display = "flex";
-
-		});
+	});
 }
+
+
+function scrollToBottom(smooth=true) {
+	let bottomElement = messageArea.lastElementChild;
+	bottomElement.scrollIntoView({ behavior: smooth?'smooth':'instant', block: 'end' });
+}
+
 
 function addMessage(message, byMe){
 	const p = document.createElement("p");
 	if (byMe) p.classList.add("ByMe");
-	p.innerHTML = message;
+	p.innerHTML = message.replaceAll("\n", "<br>");
 	messageArea.appendChild(p);
 }
 
