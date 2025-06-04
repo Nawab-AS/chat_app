@@ -1,4 +1,4 @@
-![Hackatime Badge](https://hackatime-badge.hackclub.com/U0857UWECTS/text_share?color=darkgreen?aliases=chat_app)
+![Hackatime Badge](https://hackatime-badge.hackclub.com/U0857UWECTS/text_share?aliases=chat_app)
 
 # Chat App
 
