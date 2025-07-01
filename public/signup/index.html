@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head style="display: none">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/signup/styles.css">
+    <script type="importmap">{"imports": {"vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.prod.js"}}</script>
+    <script defer src="/signup/index.js" type="module"></script>
+  </head>
+  <body>
+    <div id="app">
+      <form action="/signup" method="post" id="form">
+        <h1>Sign up</h1>
+        
+        <div id="error" v-if="error.username || error.password" style="display: none;" :style="'display: block;'">
+          <p>{{ error.username }}</p>
+          <br v-if="error.username && error.password"/>
+          <p>{{ error.password }}</p>
+        </div>
+        
+        <h3>Username</h3>
+        <input type="text" name="username" placeholder="Username" required autocomplete="off" v-model="username" @input="dataChanged = true"/>
+        <h3>Password</h3>
+        <input type="password" name="password" placeholder="Password" required autocomplete="off" v-model="password" @input="dataChanged = true"/>
+          <h3>Confirm Password</h3>
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required autocomplete="off" v-model="password2" @input="dataChanged = true"/>
+        <br/>
+        <captcha data-vue-ignore="true">
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+          <script>
+            function enableSubmit(token) {
+              document.getElementById("turnstile-response").value = token;
+            }
+          </script>
+
+          <div class="cf-turnstile" data-sitekey="<site-key>" data-callback="enableSubmit" data-theme="dark"></div>
+          <input type="hidden" id="turnstile-response" name="turnstile-response">
+        </captcha>
+        <p>I agree to the <a href="/terms?from=/signup">terms and conditions</a></p>
+        <input type="checkbox" id="terms" name="terms" required v-model="terms"/>
+        <br />
+        <button id="submit-button" type="submit" v-bind:disabled="!(error.username == '' && error.password == '' && terms)">Sign Up</button>
+        <br/><br/>
+        <p>Already have an account? <a href="/login?from=signup">Login</a></p>
+      </form>
+    </div>
+  </body>
+</html>

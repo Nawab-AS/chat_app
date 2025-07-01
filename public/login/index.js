@@ -10,3 +10,8 @@ if (error == 2){
 	errorBox.style.display = "block";
 	errorBox.children[0].innerHTML = "Captcha Failed";
 }
+
+if (error == 3){
+	errorBox.style.display = "block";
+	errorBox.children[0].innerHTML = "Your account is locked, please contact the admin";
+}

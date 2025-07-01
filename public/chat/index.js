@@ -1,142 +1,177 @@
-const userlist = document.getElementById("userlist");
-const greeting = document.getElementById("greeting");
-const sendMessage = document.getElementById("sendMessage");
-const textarea = sendMessage.querySelector("textarea");
-const messageArea = document.getElementById("messages");
-const cookies = new URLSearchParams(document.cookie.replaceAll("; ", "&"));
-var currentChat;
-var messages;
-var friends;
-var userData;
+import { createApp, ref, nextTick } from 'vue'; // destructure Vue
 
 
-// load messages
-fetch("/api/userdata.json")
+const textarea = ref("");
+const messages = ref([]);
+const moreMessages = ref(false);
+const currentChat = ref(null);
+const friends = ref([]);
+const userData = ref({1:2});
+const loadingMessages = ref(true);
+const popupValue = ref('');
+const addFriendResults = ref([]);
+const addFriendInput = ref('');
+var messageCount = 0;
+
+window.app = {popupValue, friends, loadingMessages};
+
+
+// load userdata
+fetch("/api/userdata")
 	.then((res) => res.json())
 	.then((data) =>{
-		console.log("loaded userdata", data);
-		userData = data.userData;
-		greeting.innerHTML = "Hello, " + userData.username;
-		friends = data.friends;
-		currentChat = friends[0].user_id;
-		for (let i = 0; i < friends.length; i++) {
-			addUser(friends[i]);
+		//console.log("loaded userdata", data); // debug
+		userData.value = data.userData;
+		friends.value = data.friends;
+		if (friends.value.length > 0) { // if user has friends, load chat with first friend
+			loadChat(friends.value[0].user_id);
 		}
-		loadChat(friends[0].username, friends[0].user_id);
-		document.getElementById("loadingGIF").style.display = "none";
-		messageArea.style.display = "flex";
+		
+		loadingMessages.value = false;
 });
 
 
-// UI functions
-
-function onSendMessage() {
-	if (!WS_sendData) return;
-	if (textarea.value == "") return;
-	WS_sendData({type: "message", message: textarea.value, to: currentChat, from: userData.user_id});
+// send message
+function sendMessage (event) {
+	if (!WS_sendData) return alert("disconnected from server. Wait a moment and try again"); // websocket not connected
+	//console.log("sending message", textarea.value, "to", currentChat.value, "from", userData.value.user_id); // debug
+	if (event.shiftKey) return;
+	event.preventDefault();
+	
+	if (!textarea.value.trim() || !userData.value.user_id || !currentChat.value) return; // invalid message
+	if (textarea.value.length > 1000 || textarea.value.trim().split('\n').length-1 > 10) return alert('the message is too long');
+	
+	WS_sendData({type: "message", message: textarea.value.trim(), to: currentChat.value, from: userData.value.user_id});
 	textarea.value="";
 };
 
-textarea.addEventListener('keydown', function(event) {
-	if (event.key === 'Enter') {
-		if (event.shiftKey) return; // Allow new line with Shift + Enter
-    event.preventDefault(); // Prevent the default newline
-		document.getElementById("sendMessageButton").click() // Trigger the form submission
-  }
-});
 
-function nameClicked(event) {
-	let name = event.target.name || event.target.parentElement.name;
-	let user_id = event.target.user_id || event.target.parentElement.user_id;
-	console.log(name, "clicked");
-	currentChat = user_id;
-	loadChat(name, user_id);
+function loadChat(id) {
+	if (currentChat.value == id) return;
+	currentChat.value = id;
+	loadingMessages.value = true;
+	messageCount = 0;
+	currentChat.value = id;
+
+	fetch(`/api/messages?msg_count=0&to=${id}`)
+		.then((res) => res.json())
+		.then((data) =>{
+			if (data.count[0].num_messages > 50) moreMessages.value = true;
+
+			messages.value = data.messages.sort((a, b) => Math.sign(Date.parse(a.sent_at) - Date.parse(b.sent_at)))
+				.map((message) => {return {message_text: message.message_text, from: message.sender_id,
+																	 to: message.recever_id, byMe: message.sender_id == userData.value.user_id}}
+			);
+
+			loadingMessages.value = false;
+			scrollToBottom(false);
+	});
 }
 
-function addUser(userData) {
-	var li = document.createElement("li");
-	var icon = document.createElement("icon");
-	var p = document.createElement("p");
-	icon.innerHTML = userData.username.charAt(0).toUpperCase();
-	p.innerHTML = userData.username;
-	li.appendChild(icon);
-	li.appendChild(p);
-	userlist.appendChild(li);
-
-	li.name = userData.username;
-	li.user_id = userData.user_id;
-	li.addEventListener("click", nameClicked);
+function searchFriends() {	
+	fetch(`/api/usersearch?username=${addFriendInput.value.trim()}`)
+		.then((res) => res.json())
+		.then((data) =>{
+			addFriendResults.value = data.filter((result) => (result.user_id != userData.value.user_id));
+	});
 }
 
-function removeUser(username) {
-	for (let i = 0; i < userlist.children.length; i++) {
-		if (userlist.children[i].children[1].innerHTML == username) {
-			userlist.removeChild(userlist.children[i]);
-			return true;
-		}
-	}
-	return false;
-}
-
-function loadChat(name, id, msgCount=0) {
-	document.getElementById("loadingGIF").style.display = "block";
-	messageArea.style.display = "none";
-	userlist.querySelectorAll("li").forEach((li) => {
-		li.id = name == li.name ? "selected":"";
-	})
+function addFriend(user_id) {
+	if (isNaN(user_id)) return;
 	
-	document.getElementsByTagName("titlebar")[0].innerHTML = name;
-	messageArea.innerHTML = "";
-	currentChat = id;
-	fetch(`/api/messages.json?msg_count=${msgCount}&to=${id}`)
+	fetch(`/api/addfriend?user_id=${user_id}`, {method:"POST"});
+	
+	setTimeout(()=>{ // wait for database to update THEN load new friends
+		fetch("/api/userdata")
+			.then((res) => res.json())
+			.then((data) =>{
+				friends.value = data.friends;
+		});
+	}, 1000);
+}
+
+function loadMoreMessages() {
+	loadingMessages.value = true;
+	messageCount++;
+	fetch(`/api/messages?msg_count=${messageCount}&to=${currentChat.value}`)
 		.then((res) => res.json())
 		.then((data) =>{
 			//console.log("loaded messages", data);
-			messages = data.sort((a, b) => Math.sign(Date.parse(a.sent_at) - Date.parse(b.sent_at)));
-			for (let i = 0; i < messages.length; i++) {
-				addMessage(messages[i].message_text, messages[i].sender_id == userData.user_id);
-			}
+			if (!(data.count[0].num_messages > (messageCount)*25)) moreMessages.value = false;
 			
-			messageArea.scrollTo({top: messageArea.scrollHeight+1000000, behavior: "smooth"});
-			bottomElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+			let newMessages = data.messages.sort((a, b) => Math.sign(Date.parse(a.sent_at) - Date.parse(b.sent_at)))
+				.map((message) => {return {message_text: message.message_text, from: message.sender_id,
+																	 to: message.recever_id, byMe: message.sender_id == userData.value.user_id}}
+			);
+			messages.value = newMessages.concat(messages.value);
 			
-			document.getElementById("loadingGIF").style.display = "none";
-			messageArea.style.display = "flex";
+			loadingMessages.value = false;
 	});
 }
 
 
 function scrollToBottom(smooth=true) {
-	let bottomElement = messageArea.lastElementChild;
-	bottomElement.scrollIntoView({ behavior: smooth?'smooth':'instant', block: 'end' });
+	// wait for the DOM to update with IIFE
+	(async()=>{
+		await nextTick();
+		const messageArea = document.querySelector("#messages");
+		messageArea.scrollTo({top: messageArea.scrollHeight, behavior: smooth?'smooth':'auto'});
+	})();
 }
 
-
-function addMessage(message, byMe){
-	const p = document.createElement("p");
-	if (byMe) p.classList.add("ByMe");
-	p.innerHTML = message.replaceAll("\n", "<br>");
-	messageArea.appendChild(p);
-}
 
 // Websocket functions
-function setup_WS_client(websocket) {
-	websocket.addEventListener("message", (rawData)=>{
-		let data;
-		try {
-			data = JSON.parse(rawData.data);
-		} catch (e) {return}
+function on_WS_message(rawData) {
+	//console.log("received message", rawData); // debug
+	if (rawData == 'closeClient') {
+		popupValue.value = 'hide';
+		alert("Your account has been logged in from another device/window. You will be disconnected from this current session.");
+	};
+	
+	let data;
+	try {
+		data = JSON.parse(rawData);
+	} catch (e) {return} // data is not a stringified json object
+	if (!data?.type) return; // data is not a valid message
 
-		if (data.type == "message") {
-			if (data.from == currentChat || data.to == currentChat) {
-				addMessage(data.message, data.to == currentChat);
-			}
-			if (data.from != currentChat){
-				// TODO: notify user
-			}
-			if(data.from == userData.user_id){
-				messageArea.scrollTo({top: messageArea.scrollHeight+1000000, behavior: "smooth"});
-			}
+	if (data.type == "message") {
+		if (data.sender_id == currentChat.value || data.sender_id == userData.value.user_id) {
+			let message = {message_text: data.message_text, from: data.sender_id, to: data.recever_id, byMe: data.sender_id == userData.value.user_id};
+			messages.value.push(message);
+			scrollToBottom();
 		}
-	})
+		if (data.from != currentChat){
+			// TODO: notify user
+		}
+	}
 }
+setupWS(on_WS_message);
+
+
+
+// mount vue app
+const app = {
+	setup() {
+		return {
+			messages, 
+			moreMessages, 
+			friends, 
+			currentChat, 
+			userData, 
+			loadChat,
+			loadingMessages, 
+			sendMessage, 
+			textarea, 
+			popupValue,
+			addFriendResults,
+			searchFriends,
+			addFriend,
+			addFriendInput,
+			loadMoreMessages
+		}
+	},
+	components : {
+		test:{props:["show", "name"],template: `<transition name="fade"><div class="popups" v-if="show"><div id="popup" :class="name"><slot></slot></div></div></transition>`}
+	}
+};
+createApp(app).mount('body');

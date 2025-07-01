@@ -9,8 +9,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
   height: 100%;
+  flex-wrap: wrap;
   background-color: #1c1c1c;
   font-family: sans-serif;
 }
@@ -32,22 +32,6 @@ h1 {
 
 h3 {
   margin-bottom: 20px;
-}
-
-button {
-  margin-top: 15px;
-  padding: 12px 20px;
-  border-radius: 7px;
-	background-color: #14a722;
-	color: #000000;
-	border: 2px solid #000000;
-  font-weight: bold;
-  transition-duration: 0.3s;
-}
-
-button.disabled {
-  background-color: #8a0a0a;
-  cursor: not-allowed
 }
 
 input {
@@ -82,4 +66,25 @@ a {
 a:hover {
   color: #14a722;
   text-decoration-style: wavy;
+}
+
+button {
+  margin-top: 15px;
+  padding: 12px 20px;
+  border-radius: 7px;
+	background-color: #14a722;
+	color: #000000;
+	border: 2px solid #000000;
+  font-weight: bold;
+  transition-duration: 0.3s;
+}
+
+button:hover{
+  background-color: #178222;
+  cursor: pointer;
+}
+
+button[disabled] {
+  background-color: #821717;
+  cursor: not-allowed
 }

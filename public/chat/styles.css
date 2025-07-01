@@ -7,12 +7,12 @@
 	to {opacity: 1;}
 }
 
-/****** styles ******/
-head {
-	display: none;
-}
 
-body {
+.fade-enter-active {animation: 0.4s reveal;}
+.fade-leave-active {animation: 0.4s reveal; animation-direction: reverse;}
+
+/****** styles ******/
+#body {
 	scroll-behavior: smooth;
 	display: flex;
 	margin: 20px;
@@ -20,8 +20,18 @@ body {
 	height: calc(100vh - 40px);
 	box-shadow: 0px 0px 30px #14a722;
 	border-radius: 10px;
+	transition-duration: 0.5s;
+}
 
-	animation: 0.5s 0.5s 1 steps(5) reveal forwards;
+button {
+	background-color: #14a722;
+	color: #000000;
+	border: 2px solid #000000;
+	border-radius: 5px;
+	padding: 5px;
+	margin: 10px;
+	transition-duration: 0.3s;
+	font-weight: bold;
 }
 
 #sidePanel {
@@ -54,19 +64,10 @@ body {
 	align-items: center;
 }
 
-#settingsBar #buttons button {
-	background-color: #14a722;
-	color: #000000;
-	border: 2px solid #000000;
-	border-radius: 5px;
-	padding: 5px;
-	margin: 10px;
-	transition-duration: 0.3s;
-	font-weight: bold;
-}
-
-#settingsBar #buttons button:hover {
-	background-color: #a3a3a3;
+#addFriend {
+	position: absolute;
+	left: 0px;
+	bottom: 0px;
 }
 
 #userlist {
@@ -88,7 +89,7 @@ body {
 	transition-duration: 0.3s;
 }
 
-#userlist icon {
+#userlist .icon {
 	background-color: #a01313;
 	color: #e5e4e0;
 	width: 25px;
@@ -108,13 +109,14 @@ body {
 	background-color: #616161;
 }
 
-#userlist li:hover {
+#userlist li.notSelected:hover {
 	background-color: #a3a3a3;
 	color: #000000;
 }
 
-#userlist #selected {
+#userlist li.selected {
 	font-weight: bolder;
+	background-color: #073b00;
 }
 
 #chatArea {
@@ -124,11 +126,11 @@ body {
 	border: 3px solid #14a722;
 	border-radius: 0px 10px 10px 0px;
 	background-color: #383838;
-	width: calc(100% - 150px);
+	width: calc(100vw - 40px - 250px);
 	border-left: none;
 }
 
-#chatArea titleBar {
+#chatArea #titlebar {
 	height: 30px;
 	flex-shrink: 0;
 	text-align: center;
@@ -142,12 +144,9 @@ body {
 }
 
 #chatArea #loadingGIF {
-	display: none;
-	width: 10%;
-	aspect-ratio: 1 / 1;
+	width: 50%;
 	margin: 0px auto;
 }
-
 
 #messages {
 	flex-grow: 0;
@@ -157,7 +156,7 @@ body {
 	flex-direction: column;
 }
 
-#messages p {
+#messages p {	
 	position: relative;
 	margin: 0px 0px 10px 0px;
 	font-family: "Roboto", monospace;
@@ -169,10 +168,12 @@ body {
 	max-width: 80%;
 	width: fit-content;
 	word-wrap: normal;
+	overflow-wrap: break-word;
 	right: auto;
 	text-align: left;
 	margin-left: 10px;
 	line-height: 20px;
+	white-space: pre-line;
 }
 
 #messages p.ByMe {
@@ -210,11 +211,77 @@ body {
 
 #sendMessage button {
 	width: 75px;
-	font-family: "Roboto", monospace;
 	border-radius: 0px 0px 7px 0px;
+	margin: 0px;
 	border: 0px;
 	transition-duration: 0.1s;
 	background-color: #289013;
 	color: #000000;
 	font-weight: bold;
+}
+#sendMessage button:disabled{
+	background-color: #a91414;
+	color: #e5e4e0;
+	border-left: 2px solid #14a722;
+}
+
+#loadMoreMessages {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.popups {
+	top: 0;
+	left: 0;
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	z-index: 100;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.popups #popup {
+	background-color: #383838;
+	border: 3px solid #14a722;
+	border-radius: 10px;
+	padding: 0px 20px 20px 20px;
+}
+
+.popups .addFriend{
+	width: 40vw;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.popups #closeButton {
+	margin: 0px;
+	position: relative;
+	right: calc(20vw - 7px);
+	top: 0px;
+	background-color: #a91414;
+}
+
+.popups input {
+	background-color: #1f1f1f;
+	color: #e5e4e0;
+	border: 2px solid #14a722;
+	padding: 5px;
+	border-radius: 5px;
+	outline: none;
+}
+
+
+
+/*  micro-animations  */
+button[disabled] {
+	background-color: #a91414;
+	color: #e5e4e0;
+}
+
+button:hover {
+	background-color: #a3a3a3;
 }

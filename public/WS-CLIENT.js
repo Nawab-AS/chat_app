@@ -1,5 +1,7 @@
 let WS_sendData = undefined;
-if (true) { // create a hidden scope
+function setupWS(on_WS_message) { // create a hidden scope
+    const cookies = new URLSearchParams(document.cookie.replaceAll("; ", "&"));
+    let allowReconnect = true;
     let connect = () => {
         // Connect to the WebSocket server
         const websocketURL = "wss://" + window.location.hostname +(window.location.port != '' ? ":" + window.location.port: '');
@@ -14,22 +16,23 @@ if (true) { // create a hidden scope
             WS_sendData = (data) => {
                 websocket.send(JSON.stringify(data));
             };
-            
-            if (typeof setup_WS_client === 'function') {
-                WS_sendData({ type: "auth", token: cookies.get("authToken")});
-                setup_WS_client(websocket);
-            } else {
-                console.info('setup_WS_client is not defined');
-            }
+            WS_sendData({ type: "auth", token: cookies.get("authToken")});
+            websocket.addEventListener("message", (rawData) =>{
+                if (rawData.data == "closeClient"){
+                    // WebSocket connection closed by server (reconnection not allowed
+                    allowReconnect = false;
+                    websocket.close();
+                }
+                on_WS_message(rawData.data);
+            })
             
             websocket.addEventListener("close", () => {
-                console.log("WebSocket connection closed, attempting to reconnect...");
                 WS_sendData = undefined;
+                if (!allowReconnect) return;
+                console.log("WebSocket connection closed, attempting to reconnect...");
                 connect();
                 if (typeof close_WS_client === 'function') {
                     close_WS_client(websocket);
-                } else {
-                    console.info('close_WS_client is not defined');
                 }
             });
             console.log("Connected to WebSocket server successfully");

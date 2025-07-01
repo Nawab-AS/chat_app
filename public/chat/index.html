@@ -1,40 +1,91 @@
 <!doctype html>
 <html style="height: 100%;width: 100%;font-family: 'Roboto', monospace;font-weight: 400;color: #e5e4e0;background-color: black;">
-  <head>
+  <head style="display: none;">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Chat</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link href="/chat/styles.css" rel="stylesheet" type="text/css" />
+    <link href="/chat/styles.css" rel="stylesheet" type="text/css"/>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <script defer src="/chat/index.js"></script>
+
+    <script type="importmap">{"imports": {"vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"}}</script>
+    
     <script defer src="/WS-CLIENT.js"></script>
+    <script defer src="/chat/index.js" type="module"></script>
   </head>
 
-  <body style="opacity: 0;">
-    <div id="sidePanel">
-      <div id="settingsBar">
-        <p id="greeting">Hello</p>
-        <div id="buttons">
-          <form action="/logout" method="post">
-            <button type="submit" id="logout">Logout</button>
-          </form>
-          <form action="/settings" method="get">
-            <button type="submit" id="settingsButton">Settings</button>
-          </form>
+  <body>
+    <div id="body" style="opacity: 0;" v-cloak v-bind:style="{filter: popupValue ? 'blur(5px)' : 'blur(0px)' , animation: '0.75s steps(5) reveal forwards'}" >
+      <div id="sidePanel">
+        <div id="settingsBar">
+          <p id="greeting">Hello {{ userData.username}}</p>
+          <div id="buttons">
+            <form action="/logout" method="post">
+              <button type="submit" id="logout">Logout</button>
+            </form>
+            <form action="/settings" method="get" v-if="false">
+              <button type="submit" id="settingsButton">Settings</button>
+            </form>
+            <button id="addFriend" @click="popupValue = 'addFriend'">Add friend</button>
+          </div>
+        </div>
+        <ul id="userlist">
+            <li v-for="friend in friends" :class="friend.user_id == currentChat ? 'selected' : 'notSelected'" @click="loadChat(friend.user_id)">
+                <div class="icon">{{ friend.username.charAt(0).toUpperCase() }}</div>
+                <p>{{ friend.username }}</p>
+            </li>
+            <p v-if="friends.length == 0" style="text-align: center;width:85%;margin: 10px auto;">You have no friends 😔<br><br>Click the button below to add a friend</p>
+        </ul>
+        <div style="height:300px">
         </div>
       </div>
-      <ul id="userlist"></ul>
-    </div>
-    <div id="chatArea">
-      <titleBar>Sam</titleBar>
-      <img src="images/loading.gif" alt="loadingGIF" id="loadingGIF" style="display: initial;">
-      <div id="messages" style="display: none;">
+      
+      <div id="chatArea">
+        <div id="titlebar">{{ friends.find(friend => friend.user_id == currentChat)?.username || "No Chat Selected" }}</div>
+        <img src="images/loading.svg" alt="loadingGIF" id="loadingGIF" v-if="loadingMessages">
+        <div id="messages" v-if="!loadingMessages">
+          <div id="loadMoreMessages">
+            <button v-if="moreMessages" id="loadMoreMessagesButton" @click="loadMoreMessages">Load More Messages</button>
+            <h3 style="font-size: 17px;" v-else-if="friends.length == 0">No Chat to Load</h3>
+            <h3 style="font-size: 17px;" v-else>This is the start of your conversation</h3>
+            <hr style="width: 100%;">
+            <br>
+          </div>
+          <div>
+            <p v-for="message in messages" :class="{ ByMe: message.byMe }">
+              {{ message.message_text }}
+            </p>
+          </div>
+        </div>
+        
+        <form id="sendMessage" autocomplete="off" >
+          <textarea id="_" required type="text" maxlength="1000" placeholder="Type a message..." @keydown.enter="sendMessage" v-model="textarea"/></textarea>
+          <button id="sendMessageButton" type="submit" :disabled="friends.length == 0">Send</button>
+        </form>
       </div>
-      <form id="sendMessage" autocomplete="off" onsubmit="onSendMessage(); return false;">
-        <textarea required type="text" maxlength="1000" placeholder="Type a message..."/></textarea>
-        <button id="sendMessageButton" type="submit">Send</button>
-      </form>
     </div>
+
+    <!-- popups -->
+    <test :show="popupValue == 'addFriend'" name="addFriend">
+      <button id="closeButton" @click="popupValue = ''">Close</button>
+      <h1>Add Friend</h1>
+      <div style="width: max-content;">
+        <input type="text" placeholder="Username" id="AddFriendInput" v-model="addFriendInput">
+        <button @click="searchFriends" :disabled="addFriendInput.length <= 5">{{addFriendInput.length <= 5? "Too Short" : "Search"}}</button>
+      </div>
+      <p></p>
+      <table id="AddFriendResults">
+        <tr v-for="result in addFriendResults">
+          <td>{{ result.username }}</td>
+          <td>
+            <button @click="addFriend(result.user_id)" v-if="!friends.find((i)=>i.user_id == result.user_id)">Add Friend</button>
+            <button v-else disabled>Already Friends</button>
+          </td>
+        </tr>
+        <tr v-if="addFriendResults.length == 0">
+          <td>No results (yet)</td>
+        </tr>
+      </table>
+    </test>
   </body>
 </html>

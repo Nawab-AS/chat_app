@@ -4,10 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
-    <captcha>
-      <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <script>function enableSubmit() {document.getElementById("submit-button").disabled = false}</script>
-    </captcha>
     <link rel="stylesheet" href="/login/styles.css">
   </head>
   <body>
@@ -21,14 +17,16 @@
       <h3>Password</h3>
       <input type="password" name="password" placeholder="Password" required/>
       <br/>
+      <script src="/login/index.js" defer></script>
       <captcha>
-        <div class="cf-turnstile" data-sitekey="<site-key>" data-callback="enableSubmit"></div>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        
+        <div class="cf-turnstile" data-sitekey="<site-key>" data-callback="enableSubmit" data-theme="dark"></div>
         <input type="hidden" id="turnstile-response" name="turnstile-response">
       </captcha>
-      <button id="submit-button" type="submit" disabled>Login</button>
+      <button id="submit" type="submit">Login</button>
       <br/><br/>
       <p>Don't have an account? <a href="/signup">Signup</a></p>
     </form>
   </body>
-  <script src="/login/index.js"></script>
 </html>

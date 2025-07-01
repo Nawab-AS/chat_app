@@ -1,6 +1,5 @@
-import express, { urlencoded } from "express";
+import express from "express";
 import { createServer } from 'http'
-import bodyParser from "body-parser";
 import { router, onSIGINT, saveMessage} from "./routes.js"
 import { runWSserver } from "./WS-server.js"
 import 'dotenv/config'
