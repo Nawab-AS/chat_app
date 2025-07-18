@@ -5,6 +5,10 @@
 This is a simple chat app that uses websockets, and a postgreSQL database.
 The purpose of this project is to allow me to independantly learn how to use websockets and postgres.
 
+## Live Demo
+
+Want to see a live demo? Head on over to [chat.nawab-as.software](https://chat.nawab-as.software)
+
 
 
 ## Installation 
