@@ -44,7 +44,7 @@ export const runWSserver = (server, saveMessage) => {
 					if (data.from != user_id) return;
 					//console.log(data, user_id);
 					
-					let message = {type: "message", message_text: await filter(data.message, { rigidMode: false }), sender_id: data.from, recever_id: data.to};
+					let message = {type: "message", message_text: data.message, sender_id: data.from, recever_id: data.to};
 					saveMessage(message.message_text, data.to, data.from);
 					message = JSON.stringify(message);
 					//console.log(onlineUsers[data.from].length);
