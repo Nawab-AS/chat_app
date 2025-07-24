@@ -5,6 +5,7 @@
 import pkg from "pg";
 const { Pool } = pkg;
 import { detect as profanityDetect } from 'curse-filter';
+import { randomBytes, createCipheriv, createDecipheriv, pbkdf2 as deriveKey } from 'crypto'
 import 'dotenv/config'
 
 // setup database connection
@@ -23,6 +24,7 @@ const pool = new Pool({
 });
 
 delete DATABASE_URI.password;
+let encryptionAlgorithm = "aes-256-cbc"; // if you change this, make sure it is 256 bits
 
 // low-level db functions
 async function queryDatabase(query, params=[]) {
@@ -37,8 +39,25 @@ async function queryDatabase(query, params=[]) {
 
 // high-level db functions
 export async function authenticateLogin(username, password) {
-  return (await queryDatabase("SELECT chat.AUTHENTICATE($1, $2)", [username, password]))[0]?.authenticate;
+  const user_id = await getIdFromUsername(username);
+  const userData = (await queryDatabase("SELECT username, password, iv, account_locked FROM chat.users WHERE user_id = $1", [user_id]))[0];
+  if (!userData) return "invalid";
+  if (userData.account_locked) return "locked";
+  
+  const decipher = createDecipheriv(encryptionAlgorithm, key, Buffer.from(userData.iv, 'hex'));
+  let decrypted = decipher.update(userData.password, 'hex', 'utf8');
+  decrypted += decipher.final('utf8');
+
+  if (decrypted !== password) return "invalid";
+  return "success";
 }
+
+//derive key from SECRET_KEY
+let key;
+deriveKey(process.env.SECRET_KEY, Buffer.alloc(16), 100000, 32, 'sha512', (err, derivedKey) => {
+  if (err) throw err;
+  key = derivedKey;
+});
 
 export async function getIdFromUsername(username){
   return (await queryDatabase("SELECT user_id FROM chat.USERS WHERE username = $1", [username]))[0]?.user_id;
@@ -69,12 +88,23 @@ export async function addFriend(friend1, friend2) {
 }
 
 export async function addUser(username, password) {
-  await queryDatabase("CALL chat.ADD_USER($1, $2)",[username, password]);
+  // generate a cipher
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(encryptionAlgorithm, key, iv);
+
+  // encrypt the password
+  let encrypted = cipher.update(password, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+
+  // save to db
+  console.log("adding user", username, encrypted, iv.toString('hex'))
+  await queryDatabase("CALL chat.ADD_USER($1, $2, $3)",[username+"", encrypted+"", iv.toString('hex')+""]);// +"" is to make sure it is a string
   return (await queryDatabase("SELECT user_id FROM chat.users WHERE username = $1", [username]))[0].user_id;
 }
 
 
 export async function validSignup(username, password){
+  // check username
   let usernameError = !username ? {allowed:false, hint:"Enter a username"} : await (async()=>{
     if (username.length < 7) return {allowed:false, hint:"Username must be at least 7 characters long"};
     if (username.length > 20) return {allowed:false, hint:"Username must be less than 20 characters long"};
@@ -86,6 +116,7 @@ export async function validSignup(username, password){
     return {allowed:true, hint:""};
   })();
 
+  // check password
   let passwordError = !password ? {allowed:false, hint:"Enter a password"} : await (async()=>{
     if (password.length < 7) return {allowed:false, hint:"Password must be at least 7 characters long"};
     if (password.length > 20) return {allowed:false, hint:"Password must be less than 20 characters long"};

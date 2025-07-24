@@ -5,26 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
     <link rel="stylesheet" href="/login/styles.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="/login/index.js" defer></script>
   </head>
   <body>
     <form action="/login" method="post" id="form">
       <h1>Login</h1>
       <h3>Username</h3>
-      <div id="error" style="display: none;">
-        <p></p>
+      <div id="error" v-if='error' v-clock>
+        <p v-if='error == 1'>Invalid Username or Password</p>
+        <p v-if='error == 2'>Captcha Failed</p>
+        <p v-if='error == 3'>Your account is locked, please contact the admin at nawab-as@hackclub.app</p>
       </div>
-      <input type="text" name="username" placeholder="Username" required autocomplete="on"/>
+      <input type="text" name="username" placeholder="Username" required autocomplete="on" v-model='username'/>
       <h3>Password</h3>
-      <input type="password" name="password" placeholder="Password" required/>
+      <input type="password" name="password" placeholder="Password" required v-model='password'/>
       <br/>
-      <script src="/login/index.js" defer></script>
-      <captcha>
+      
+      <captcha v-pre>
         <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         
         <div class="cf-turnstile" data-sitekey="<site-key>" data-callback="enableSubmit" data-theme="dark"></div>
         <input type="hidden" id="turnstile-response" name="turnstile-response">
       </captcha>
-      <button id="submit" type="submit">Login</button>
+      <button id="submit" type="submit" :disabled="!(captcha && username && password)">Login</button>
       <br/><br/>
       <p>Don't have an account? <a href="/signup">Signup</a></p>
     </form>

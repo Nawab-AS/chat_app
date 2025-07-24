@@ -1,17 +1,22 @@
-import { createApp, ref } from 'vue';
+let { createApp, ref } = Vue;
 
 const dataChanged = ref(false);
 const username = ref("");
 const password = ref("");
 const password2 = ref("");
+const captcha = ref(false)
 const terms = ref(false);
 const error = ref({password:"Enter a password", username:"Enter a username"});
+
+function enableSubmit(token) {
+	document.getElementById("turnstile-response").value = token;
+	captcha.value = true;
+}
 
 let signupError = new URLSearchParams(document.location.search).get("error");
 if (signupError == 1) alert("there was an error signing up, please try again later\nif the problem persists, contact the nawab-as@hackclub.app");
 if (signupError == 2) alert("captcha failed, please try again");
 
-window.app = {username, dataChanged, password, password2, error, terms};
 
 setInterval(()=>{
 	if (dataChanged.value){
@@ -25,7 +30,7 @@ setInterval(()=>{
 }, 500);
 
 // mount vue app
-const app = {
+const app = createApp({
 	setup() {
 		return {
 			username,
@@ -33,8 +38,10 @@ const app = {
 			password2,
 			terms,
 			error,
-			dataChanged
+			dataChanged,
+			captcha
 		}
 	}
-};
-createApp(app).mount('#app');
+});
+app.config.compilerOptions.isCustomElement = tag => (tag === 'captcha' || tag === 'script')
+app.mount('#app');

@@ -1,17 +1,24 @@
-let error = new URLSearchParams(document.location.search).get("error")
-let errorBox = document.getElementById("error");
+let { createApp, ref } = Vue;
 
-if (error == 1){
-	errorBox.style.display = "block";
-	errorBox.children[0].innerHTML = "Invalid Username or Password";
+const error = ref(new URLSearchParams(document.location.search).get("error") || false);
+const username = ref('');
+const password = ref('');
+const captcha = ref(false);
+
+function enableSubmit(token) {
+	document.getElementById("turnstile-response").value = token;
+	captcha.value = true;
 }
 
-if (error == 2){
-	errorBox.style.display = "block";
-	errorBox.children[0].innerHTML = "Captcha Failed";
-}
-
-if (error == 3){
-	errorBox.style.display = "block";
-	errorBox.children[0].innerHTML = "Your account is locked, please contact the admin";
-}
+const app = createApp({
+	setup() {
+		return {
+			error,
+			username,
+			password,
+			captcha
+		}
+	}
+});
+app.config.compilerOptions.isCustomElement = tag => (tag === 'captcha' || tag === 'script');
+app.mount('body');

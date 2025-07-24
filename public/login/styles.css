@@ -45,7 +45,7 @@ button {
   transition-duration: 0.3s;
 }
 
-button.disabled {
+button[disabled] {
   background-color: #8a0a0a;
   cursor: not-allowed
 }

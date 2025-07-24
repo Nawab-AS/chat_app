@@ -119,6 +119,15 @@ button {
 	background-color: #073b00;
 }
 
+.adminTag{
+	background-color: #a01313;
+	border-radius: 5px;
+	padding: 2px 5px;g
+	margin-left: 5px;
+	font-size: 15px;
+}
+
+
 #chatArea {
 	display: flex;
 	flex-direction: column;

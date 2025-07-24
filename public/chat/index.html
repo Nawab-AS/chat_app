@@ -6,12 +6,10 @@
     <title>Chat</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link href="/chat/styles.css" rel="stylesheet" type="text/css"/>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-
-    <script type="importmap">{"imports": {"vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"}}</script>
-    
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">  
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script defer src="/WS-CLIENT.js"></script>
-    <script defer src="/chat/index.js" type="module"></script>
+    <script defer src="/chat/index.js"></script>
   </head>
 
   <body>
@@ -19,12 +17,10 @@
       <div id="sidePanel">
         <div id="settingsBar">
           <p id="greeting">Hello {{ userData.username}}</p>
+          <div class='adminTag' v-if='userData.user_type != "user"'>{{ userData.user_type }}</div>
           <div id="buttons">
             <form action="/logout" method="post">
               <button type="submit" id="logout">Logout</button>
-            </form>
-            <form action="/settings" method="get" v-if="false">
-              <button type="submit" id="settingsButton">Settings</button>
             </form>
             <button id="addFriend" @click="popupValue = 'addFriend'">Add friend</button>
           </div>
@@ -33,6 +29,7 @@
             <li v-for="friend in friends" :class="friend.user_id == currentChat ? 'selected' : 'notSelected'" @click="loadChat(friend.user_id)">
                 <div class="icon">{{ friend.username.charAt(0).toUpperCase() }}</div>
                 <p>{{ friend.username }}</p>
+                <div class='adminTag' v-if='friend.user_type != "user"'>{{ friend.user_type }}</div>
             </li>
             <p v-if="friends.length == 0" style="text-align: center;width:85%;margin: 10px auto;">You have no friends 😔<br><br>Click the button below to add a friend</p>
         </ul>

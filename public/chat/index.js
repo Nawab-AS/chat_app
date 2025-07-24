@@ -1,4 +1,4 @@
-import { createApp, ref, nextTick } from 'vue'; // destructure Vue
+let { createApp, ref, nextTick } = Vue; // destructure Vue
 
 
 const textarea = ref("");
@@ -12,8 +12,6 @@ const popupValue = ref('');
 const addFriendResults = ref([]);
 const addFriendInput = ref('');
 var messageCount = 0;
-
-window.app = {popupValue, friends, loadingMessages};
 
 
 // load userdata
@@ -139,9 +137,6 @@ function on_WS_message(rawData) {
 			let message = {message_text: data.message_text, from: data.sender_id, to: data.recever_id, byMe: data.sender_id == userData.value.user_id};
 			messages.value.push(message);
 			scrollToBottom();
-		}
-		if (data.from != currentChat){
-			// TODO: notify user
 		}
 	}
 }

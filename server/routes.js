@@ -13,10 +13,10 @@ import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 
 import 'dotenv/config'
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_SECRET = process.env.SECRET_KEY;
 const CAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET_KEY;
 const CAPTCHA_SITE_KEY = process.env.CAPTCHA_SITE_KEY;
-const useCaptcha = (CAPTCHA_SITE_KEY && CAPTCHA_SECRET_KEY)
+const useCaptcha = (CAPTCHA_SITE_KEY && CAPTCHA_SECRET_KEY);
 
 // get the directory of this file
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -116,7 +116,7 @@ export function router(app) {
     const turnstileToken = req.body['cf-turnstile-response'];
     const { username, password } = req.body;
 
-    try {   
+    try {
       if (useCaptcha) {
         const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
           secret: CAPTCHA_SECRET_KEY,
@@ -136,7 +136,7 @@ export function router(app) {
       createToken({user_id: user_id}, res);
       res.redirect("/chat");
     } catch (error) {
-      console.error('Error verifying Turnstile:', error.message);
+      console.error('Error verifying Turnstile:', error);
       res.redirect("/login?error=2"); // captcha failed
     }
   });
@@ -160,19 +160,23 @@ export function router(app) {
   // signup request
   app.post("/signup", redirectToHome, async (req, res) => {
     const turnstileToken = req.body['cf-turnstile-response'];
+    const ip = req.body['CF-Connecting-IP'];
     const { username, password } = req.body;
 
-    try {   
+     
       if (useCaptcha) {
         const response = await axios.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
           secret: CAPTCHA_SECRET_KEY,
-          response: turnstileToken
+          response: turnstileToken,
+          remoteip: ip
         }, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}});
+        
+        if (!response.data.success) return res.redirect("/signup?error=2");
 
-        if (!response.data.success) return res.redirect("/signup?error=2"); // captcha failed
       }
       // captcha passed (or not used), authenticate user
       if (!username || !password) return res.redirect("/signup?error=1");
+    try {
       
       const validSignup = await database.validSignup(username, password);
       if (!validSignup.username.allowed || !validSignup.password.allowed) return res.redirect("/signup?error=1"); // invalid signup info
@@ -181,7 +185,7 @@ export function router(app) {
       createToken({user_id: user_id}, res);
       res.redirect("/chat");
     } catch (error) {
-      console.error('Error verifying Turnstile:', error.message);
+      console.error('Error verifying Turnstile:', error);
       res.redirect("/signup?error=2"); // captcha failed
     }
   });

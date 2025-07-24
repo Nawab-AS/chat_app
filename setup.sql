@@ -12,6 +12,7 @@ CREATE TABLE chat.USERS (
 	user_id				SERIAL			NOT NULL	PRIMARY KEY,
 	username			VARCHAR(32)		NOT NULL	UNIQUE,
 	password			VARCHAR(32)		NOT NULL,
+	iv					VARCHAR(32)		NOT NULL,
 	user_created_at		TIMESTAMP		NOT NULL	DEFAULT CURRENT_TIMESTAMP,
 	user_type			chat.USER_TYPES	NOT NULL	DEFAULT 'user',
 	account_locked		BOOLEAN			NOT NULL	DEFAULT False
@@ -35,38 +36,13 @@ CREATE TABLE chat.FRIENDS (
 
 -- user procedures
 
-
--- SELECT * FROM chat.AUTHENTICATE('<username>', '<password>')
-CREATE FUNCTION chat.AUTHENTICATE(p_username VARCHAR, p_password VARCHAR)
-RETURNS VARCHAR(32)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-		v_stored_password VARCHAR(32);
-	is_locked BOOLEAN;
-BEGIN
-		SELECT u.password, u.account_locked INTO v_stored_password, is_locked
-		FROM chat.USERS u
-		WHERE username = p_username;
-
-		IF FOUND AND v_stored_password = p_password THEN
-				RETURN CASE 
-			WHEN is_locked THEN 'locked'
-			ELSE 'success' END;
-		ELSE
-				RETURN 'denied';
-		END IF;
-END;
-$$;
-
-
 -- CALL chat.ADD_USER('<username>', '<password>')
-CREATE PROCEDURE chat.ADD_USER (p_username VARCHAR, p_password VARCHAR)
+CREATE PROCEDURE chat.ADD_USER (p_username VARCHAR, p_password VARCHAR, p_iv VARCHAR)
 LANGUAGE plpgsql
 AS $$
 BEGIN
-	INSERT INTO chat.USERS (username, password)
-		VALUES (p_username, p_password);
+	INSERT INTO chat.USERS (username, password, iv)
+		VALUES (p_username, p_password, p_iv);
 END;
 $$;
 
@@ -215,13 +191,14 @@ RETURNS TABLE (
 		username            VARCHAR(32),
 		created_at          TIMESTAMP,
 		request_accepted    BOOLEAN,
-		initiated_by_me     BOOLEAN
+		initiated_by_me     BOOLEAN,
+		user_type			chat.USER_TYPES
 )
 LANGUAGE plpgsql
 AS $$
 BEGIN
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.user_created_at, f.request_accepted,
+		SELECT u.user_id, u.username, u.user_created_at, f.request_accepted, u.user_type,
 				CASE
 						WHEN f.friend1 = p_user_id THEN TRUE
 						ELSE FALSE
@@ -235,4 +212,3 @@ BEGIN
 				);
 END;
 $$;
-

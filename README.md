@@ -34,9 +34,11 @@ npm i
 2.  Run ```setup.sql``` on the database through pgadmin, dbeaver, psql, etc to setup tables, functions and procedures
 
 
-3. Create a ```.env``` file in the root directory that constains the following
+3. Create a ```.env``` file in the root directory that constains the following.
+
+	> WARNING: The actual valus of the ```.env``` file should never be shared with anyone otherwise it could lead to a security breach
 ```
-SESSION_SECRET="<insert your session secret>"
+SESSION_KEY="<insert your session secret>"
 DATABASE_URI="postgres://<username>:<password>@<host>:<port>/<database name>"
 ```
 

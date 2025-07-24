@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { WebSocketServer } from 'ws';
 import 'dotenv/config'
-import { filter } from 'curse-filter';
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_SECRET = process.env.SESSION_KEY;
 
 
 export const runWSserver = (server, saveMessage) => {
