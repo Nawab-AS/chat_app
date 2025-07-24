@@ -17,7 +17,11 @@ const SESSION_SECRET = process.env.SECRET_KEY;
 const CAPTCHA_SECRET_KEY = process.env.CAPTCHA_SECRET_KEY;
 const CAPTCHA_SITE_KEY = process.env.CAPTCHA_SITE_KEY;
 const useCaptcha = (CAPTCHA_SITE_KEY && CAPTCHA_SECRET_KEY);
-
+if (useCaptcha) {
+  console.log("Captcha will be used");
+} else {
+  console.log("CAPTCHA_SITE_KEY and/or CAPTCHA_SECRET_KEY not set, captcha will not be used");
+}
 // get the directory of this file
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const __publicDirname = joinPath(__dirname, "..", "public");
@@ -96,7 +100,7 @@ export function router(app) {
     res.sendFile(__publicDirname + "/terms/index.html");
   });
 
-  // Login page
+  // Login page (basic string manipulation to add captcha)
   let loginStr = "";
   readFile(joinPath(__publicDirname, "/login/index.html"), (err, file)=>{
     if (err) throw new Error(err);
@@ -104,7 +108,7 @@ export function router(app) {
     if (useCaptcha) {
       loginStr = file.toString().split("<site-key>").join(CAPTCHA_SITE_KEY);
     } else {
-      loginStr = file.toString().split(/<captcha>(.|\n)*?<\/captcha>/).join("");
+      loginStr = file.toString().split(/<captcha(.|\n)*?<\/captcha>/).join("");
     }
   });
   app.get("/login", redirectToHome, (req, res) => {
@@ -150,7 +154,7 @@ export function router(app) {
     if (useCaptcha) {
       signupStr = file.toString().split("<site-key>").join(CAPTCHA_SITE_KEY);
     } else {
-      signupStr = file.toString().split(/<captcha>(.|\n)*?<\/captcha>/).join("");
+      signupStr = file.toString().split(/<captcha(.|\n)*?<\/captcha>/).join("");
     }
   });
   app.get("/signup", redirectToHome, (req, res) => {

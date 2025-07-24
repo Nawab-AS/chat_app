@@ -28,19 +28,26 @@ npm i
 
 ## Usage
 
-1.  Create a postgreSQL database that is either local or cloud hosted
+1.  Create a postgreSQL database. there are multiple ways of doing this, one way to do this is by using the ```createdb``` command in your terminal,
+    > This is not the only way to setup a PostgreSQL database, hense, you are not limited to only this method and can do it is any way you please
+    ```bash
+    createdb <database_name>
+    ```
+    Replace `<database_name>` with the desired name for your database. You may need to adjust user permissions or connection settings depending on your PostgreSQL setup.
 
 
-2.  Run ```setup.sql``` on the database through pgadmin, dbeaver, psql, etc to setup tables, functions and procedures
+3.  Run ```setup.sql``` on the database through pgadmin, dbeaver, psql, etc to setup tables, functions and procedures
 
 
-3. Create a ```.env``` file in the root directory that constains the following.
+4. Create a ```.env``` file in the root directory that constains the following.
 
 	> WARNING: The actual valus of the ```.env``` file should never be shared with anyone otherwise it could lead to a security breach
 ```
 SESSION_KEY="<insert your session secret>"
 DATABASE_URI="postgres://<username>:<password>@<host>:<port>/<database name>"
 ```
+- ```SESSION_KEY``` is a random cryptographically generated string that is used to authorize login sessions and encrypt user passwords, Because of this, it is essential that it remains the same and isn't leaked.
+- ```DATABASE_URI``` contains the necessary credentials to access your database.
 
 Optionaly, you can use cloudflare turnstiles (similar to captcha).
 Simply create a site and secret [here](https://developers.cloudflare.com/turnstile/get-started/) and add the following to your ```.env``` file
@@ -51,7 +58,8 @@ CAPTCHA_SECRET_KEY="<insert your secret key>"
 Now captcha will be require during login and sign up.
 
 
-4. Run the following command in terminal
+4. Run the
+5. un the following command in terminal
 ```
 npm run start
 ```

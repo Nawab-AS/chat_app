@@ -1,9 +1,12 @@
-let { createApp, ref } = Vue;
+let { createApp, ref, nextTick } = Vue;
 
 const error = ref(new URLSearchParams(document.location.search).get("error") || false);
 const username = ref('');
 const password = ref('');
 const captcha = ref(false);
+
+// disable captcha if not used
+if (document.getElementsByTagName('captcha').length == 0) captcha.value = true;
 
 function enableSubmit(token) {
 	document.getElementById("turnstile-response").value = token;

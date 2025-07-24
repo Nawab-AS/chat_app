@@ -8,6 +8,9 @@ const captcha = ref(false)
 const terms = ref(false);
 const error = ref({password:"Enter a password", username:"Enter a username"});
 
+// disable captcha if not used
+if (document.getElementsByTagName('captcha').length == 0) captcha.value = true;
+
 function enableSubmit(token) {
 	document.getElementById("turnstile-response").value = token;
 	captcha.value = true;
