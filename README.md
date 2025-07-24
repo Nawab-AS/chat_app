@@ -58,8 +58,7 @@ CAPTCHA_SECRET_KEY="<insert your secret key>"
 Now captcha will be require during login and sign up.
 
 
-4. Run the
-5. un the following command in terminal
+4. Run the server using the following command in terminal
 ```
 npm run start
 ```
