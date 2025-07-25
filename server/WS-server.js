@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { WebSocketServer } from 'ws';
 import 'dotenv/config'
-const SESSION_SECRET = process.env.SESSION_KEY;
+const SESSION_SECRET = process.env.SECRET_KEY;
 
 
 export const runWSserver = (server, saveMessage) => {
@@ -23,7 +23,6 @@ export const runWSserver = (server, saveMessage) => {
 				if (data.type == "auth") {
 					try {
 						if (!data?.token) return;
-						
 				    const authData = jwt.verify(data.token, SESSION_SECRET);
 						if (!authData?.user_id) return; // invalid user_id
 						auth = true;
