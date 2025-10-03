@@ -41,7 +41,8 @@ npm i
 
 4. Create a ```.env``` file in the root directory that constains the following.
 
-	> WARNING: The actual valus of the ```.env``` file should never be shared with anyone otherwise it could lead to a security breach
+> [!CAUTION]
+> The actual valus of the ```.env``` file should never be shared with anyone otherwise it could lead to a security breach
 ```
 SESSION_KEY="<insert your session secret>"
 DATABASE_URI="postgres://<username>:<password>@<host>:<port>/<database name>"
